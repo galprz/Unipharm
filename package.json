@@ -1,0 +1,19 @@
+{
+  "name": "unifarm",
+  "version": "1.0.0",
+  "description": "This is the main repo of the Unifarm project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No test for now\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galprz/Unifarm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/galprz/Unifarm/issues"
+  },
+  "homepage": "https://github.com/galprz/Unifarm#readme"
+}
