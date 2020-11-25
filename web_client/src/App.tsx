@@ -1,13 +1,13 @@
-import React from 'react';
-import Login from './Login';
-import { SignUp } from './SignUp';
+import React, { Fragment } from 'react';
+import Login from './componenets/registration/Login';
+import { SignUp } from './componenets/registration/SignUp';
 
 const App: React.FC = () => {
   return (
-    <>
-      <SignUp/>
-      <Login/>
-    </>
+    <div>
+      <SignUp></SignUp>
+      <Login></Login>
+    </div>
   );
 }
 
