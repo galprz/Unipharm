@@ -1,17 +1,14 @@
 import React from "react";
 import '../../../src/Style.css';
 import './RegistrationStyle.css';
-import { TextField } from "./TextField";
+import { TextField } from "../common/TextField";
 import Utils from './RegistrationUtils';
+import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
 
 enum SignUpEnum {
    username = "Username",
    password = "Password"
-}
-
-interface SignUpProps {
-    name?: any;
-    value?: any;
 }
 
 interface SignUpState {
@@ -23,8 +20,8 @@ interface SignUpState {
     }
  }
 
-export class SignUp extends React.Component<SignUpProps, SignUpState>{
-   constructor(props: SignUpProps) {
+export class SignUp extends React.Component<any, SignUpState>{
+   constructor(props: any) {
       super(props);
       const initialState = {
          username : '',
@@ -94,8 +91,9 @@ export class SignUp extends React.Component<SignUpProps, SignUpState>{
                <TextField value = {SignUpEnum.username} error = {errors.username} type = 'text' onChange = {this.handleChange}></TextField>
                <TextField value = {SignUpEnum.password} error = {errors.password} type = 'password' onChange = {this.handleChange}></TextField>            
                <div className='submit'>
-                  <button>Register Me</button>
+                  <button>Register</button>
                </div>
+               <Button component={Link} to="/Login">Go back to login</Button>
             </form>
          </div>
       </div>

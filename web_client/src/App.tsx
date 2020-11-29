@@ -1,12 +1,10 @@
 import React from 'react';
-import Login from './componenets/registration/Login';
-import { SignUp } from './componenets/registration/SignUp';
+import {Registration} from './componenets/registration/Registration';
 
 const App: React.FC = () => {
   return (
     <div>
-      <SignUp></SignUp>
-      <Login></Login>
+      <Registration></Registration>
     </div>
   );
 }

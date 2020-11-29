@@ -1,8 +1,10 @@
 import React from 'react';
 import '../../../src/Style.css';
 import './RegistrationStyle.css';
-import { TextField } from "./TextField";
+import { TextField } from "../common/TextField";
 import Utils from './RegistrationUtils';
+import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
 
 interface LoginState {
   username : string,
@@ -54,8 +56,9 @@ export class Login extends React.Component<any, LoginState>{
             <TextField value = 'Username' error = '' type = 'text' onChange = {this.handleUsernameChange}></TextField>
             <TextField value = 'Password' error = '' type = 'password' onChange = {this.handlePasswordChange}></TextField>            
             <div className='submit'>
-              <button>Enter The System</button>
+              <button>Login</button>
             </div>
+            <Button component={Link} to="/SignUp">Or click here to sign up</Button>
           </form>
         </div>
       </div>

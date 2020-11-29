@@ -33,12 +33,16 @@ p, div {
     font-weight: lighter;
     margin-top: 0.25em;
     color: #222;
+    align-self: auto;
+    flex-direction: column;
   }
   
   form {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+    align-self: auto;
+    flex-direction: column;
   }  
   
   label {
