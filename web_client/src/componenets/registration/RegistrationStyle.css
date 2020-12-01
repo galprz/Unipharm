@@ -1,0 +1,13 @@
+.Username,
+.Password {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  width: 100%;
+}
+  
+.submit {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
