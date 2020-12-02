@@ -38,12 +38,7 @@ export class Login extends React.Component<any, LoginState>{
   };
 
   handleSubmit(event : any){
-    event.preventDefault();
-    if(Utils.validateLogin(this.state.email, this.state.password)){
-       console.log("Registering can be done");
-    }else{
-       console.log("You cannot login!!!")
-    }
+    console.log("Registering can be done");
   }
 
   render()

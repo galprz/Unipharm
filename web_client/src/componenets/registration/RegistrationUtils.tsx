@@ -16,8 +16,4 @@ export default class Utils {
         return password.length < 6 ? 'Password must be 6 characters long!': '';
     }
 
-    static validateLogin(username: String, password: String){
-        return true;
-    }
-
 }
