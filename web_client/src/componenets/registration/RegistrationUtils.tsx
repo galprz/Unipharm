@@ -1,3 +1,8 @@
+export enum RegistrationEnum {
+    email = "Email",
+    password = "Password"
+}
+
 export default class Utils {
 
     static checkSignUpUserName(username: String)

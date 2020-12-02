@@ -2,20 +2,15 @@ import React from "react";
 import '../../../src/Style.css';
 import './RegistrationStyle.css';
 import { TextField } from "../common/TextField";
-import Utils from './RegistrationUtils';
+import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 
-enum SignUpEnum {
-   username = "Username",
-   password = "Password"
-}
-
 interface SignUpState {
-    username : string,
+    email : string,
     password : string,
     errors : {
-       username :  string,
+       email :  string,
        password : string
     }
  }
@@ -24,10 +19,10 @@ export class SignUp extends React.Component<any, SignUpState>{
    constructor(props: any) {
       super(props);
       const initialState = {
-         username : '',
+         email : '',
          password : '',
          errors : {
-           username : '',
+           email : '',
            password : ''
          } 
        }
@@ -41,24 +36,24 @@ export class SignUp extends React.Component<any, SignUpState>{
       const { name, value } = event.target;
       let error;
       switch (name) {
-        case SignUpEnum.username:
+        case RegistrationEnum.email:
            error = Utils.checkSignUpUserName(value);
            console.log("Username Error: " + error);
            this.setState({ 
             errors: 
             {
-               username: error,
+               email: error,
                password: this.state.errors.password
             }
             });
            break;
-        case SignUpEnum.password:
+        case RegistrationEnum.password:
            error = Utils.checkSignUpPassword(value);
            console.log("Password Error: " + error);
            this.setState({ 
             errors: 
             {
-               username: this.state.errors.username,
+               email: this.state.errors.email,
                password: error
             }
             });
@@ -88,8 +83,8 @@ export class SignUp extends React.Component<any, SignUpState>{
          <div className='form-wrapper'>
             <h2>Sign Up</h2>
             <form onSubmit={this.handleSubmit} noValidate >
-               <TextField value = {SignUpEnum.username} error = {errors.username} type = 'text' onChange = {this.handleChange}></TextField>
-               <TextField value = {SignUpEnum.password} error = {errors.password} type = 'password' onChange = {this.handleChange}></TextField>            
+               <TextField value = {RegistrationEnum.email} error = {errors.email} type = 'text' onChange = {this.handleChange}></TextField>
+               <TextField value = {RegistrationEnum.password} error = {errors.password} type = 'password' onChange = {this.handleChange}></TextField>            
                <div className='submit'>
                   <button>Register</button>
                </div>
