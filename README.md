@@ -1,2 +1,2 @@
-# Unifarm
-This is the main repo of the Unifarm project
+# Unipharm
+This is the main repo of the Unipharm project
