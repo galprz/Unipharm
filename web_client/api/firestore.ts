@@ -1,56 +1,50 @@
+import {firebaseClient} from './init-firebase'
+
 interface IFirePath{
     readonly path : string
     asArray(p : string) : Array<[string, string]>
 }
 
-import {firebase} from './init-firebase'
+export class FirestoreClient{
+ 
+    private  getDocRef(path: IFirePath) {
+        let docRef = firebaseClient.firestore()
+        path.asArray(path.path).forEach(function([collectionName, DocumentName]){
+            docRef = docRef.collection(collectionName).doc(DocumentName)
+        })
+        return docRef;
+    }
 
-function getDocRef(path: IFirePath) {
-    var databaseReference = firebase.firestore()
-    var docRef = databaseReference
-    path.asArray(path.path).forEach(function([collectionName, DocumentName]){
-        docRef = docRef.collection(collectionName).doc(DocumentName)
-    })
-    return docRef;
-}
+    private async pathExists(path: IFirePath){
+        const saidDocument = await this.getDocRef(path).get()
+        return saidDocument.exists;
+    }
 
+    private writeJsonToDocument(path: IFirePath, data: Array<[string,string]>){
+        var docRef = this.getDocRef(path);
+        data.forEach(function([key,value]){
+            docRef.set({key: value})
+        })
+    }
 
-function readDocument(path: IFirePath){
-    var docRef = getDocRef(path);
-    docRef.get().then(function(doc: { data: () => any }) {
-            return doc.data()
-    });
-}
+    async read(path: IFirePath){
+        var doc = await this.getDocRef(path).get();
+        return doc.data();
+        
+    }
 
-function updateDocument(path: IFirePath, data : Array<[string,string]>){
-    var docRef = getDocRef(path);
-    data.forEach(function([key,value]){
-        docRef.set({key: value})
-    })
+    update(path: IFirePath, data : Array<[string,string]>){
+        if(this.pathExists(path)) this.writeJsonToDocument(path,data);
+    }
 
-}
+    create(path: IFirePath, data : Array<[string,string]>){
+        if(!this.pathExists(path)) this.writeJsonToDocument(path,data);
+    }
 
-
-/*
-
-function readSettings(){
-    var db = firebase.firestore()
-    var settingsRef = db.collection("dev").doc("setting");
-    settingsRef.get().then(function(doc: { exists: any; data: () => any; }) {
-        if (doc.exists) {
-            console.log("Document data:", doc.data());
-        } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
+    delete(path: IFirePath, field : string){
+        if(this.pathExists(path)){
+            const ref = this.getDocRef(path)
+            ref.update({field: firebaseClient.firestore.FieldValue.delete()})
         }
-    }).catch(function(error: any) {
-        console.log("Error getting document:", error);
-    });
+    }
 }
-
-function writeSettings(val: string){
-    var db = firebase.firestore()
-    var settingsRef = db.collection("dev").doc("setting");
-    settingsRef.set({test : val})
-}
-*/
