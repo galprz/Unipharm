@@ -2,94 +2,73 @@ import React from "react";
 import '../../../src/Style.css';
 import './RegistrationStyle.css';
 import { TextField } from "../common/TextField";
-import Utils from './RegistrationUtils';
+import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-
-enum SignUpEnum {
-   username = "Username",
-   password = "Password"
-}
+import fire from '../../fire';
 
 interface SignUpState {
-    username : string,
+    email : string,
     password : string,
-    errors : {
-       username :  string,
-       password : string
-    }
+    email_error : string,
+    password_error : string
  }
 
 export class SignUp extends React.Component<any, SignUpState>{
-   constructor(props: any) {
+   constructor(props: {}) {
       super(props);
       const initialState = {
-         username : '',
+         email : '',
          password : '',
-         errors : {
-           username : '',
-           password : ''
-         } 
+         email_error : '',
+         password_error : ''
        }
        this.state = initialState;
-       this.handleChange = this.handleChange.bind(this);
-       this.handleSubmit = this.handleSubmit.bind(this);
+       this.handleEmailChange = this.handleEmailChange.bind(this);
+       this.handlePasswordChange = this.handlePasswordChange.bind(this);
+       this.handleSignup = this.handleSignup.bind(this);
    }
 
-   handleChange(event : any){
-      event.preventDefault();
-      const { name, value } = event.target;
-      let error;
-      switch (name) {
-        case SignUpEnum.username:
-           error = Utils.checkSignUpUserName(value);
-           console.log("Username Error: " + error);
-           this.setState({ 
-            errors: 
-            {
-               username: error,
-               password: this.state.errors.password
-            }
-            });
-           break;
-        case SignUpEnum.password:
-           error = Utils.checkSignUpPassword(value);
-           console.log("Password Error: " + error);
-           this.setState({ 
-            errors: 
-            {
-               username: this.state.errors.username,
-               password: error
-            }
-            });
-           break;
-        default:
-          break;
-      }
-    }
+   handleEmailChange(event : any){
+      const email = event.target.value;
+      const email_error = Utils.checkEmail(email);
+      this.setState({email, email_error});
+   }
 
-   handleSubmit(event : any){
+   handlePasswordChange(event : any){
+      const password = event.target.value;
+      const password_error = Utils.checkPassword(password);
+      this.setState({password, password_error});
+   }
+
+   async handleSignup(event : any){
       event.preventDefault();
-      let validity = true;
-      Object.values(this.state.errors).forEach(
-         (val) => val.length > 0 && (validity = false)
-      );
-      if(validity === true){
-         console.log("Registering can be done");
-      }else{
-         console.log("You cannot be registered!!!")
+      try {
+         const result = await fire.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+         alert("Successfully registered")
       }
+      catch(result) {
+         this.setState({email_error : "Couldn't sign up"})
+      }
+      // TODO: If the sign up was successful open the home screen once we have one
    }
 
     render() { 
-      const {errors} = this.state 
       return (
       <div className='wrapper'>
          <div className='form-wrapper'>
             <h2>Sign Up</h2>
-            <form onSubmit={this.handleSubmit} noValidate >
-               <TextField value = {SignUpEnum.username} error = {errors.username} type = 'text' onChange = {this.handleChange}></TextField>
-               <TextField value = {SignUpEnum.password} error = {errors.password} type = 'password' onChange = {this.handleChange}></TextField>            
+            <form onSubmit={this.handleSignup}>
+               <TextField value = {RegistrationEnum.email} 
+                          error = {this.state.email_error} 
+                          type = 'text' 
+                          onChange = {this.handleEmailChange} 
+                          class_name = "email"></TextField>
+               <TextField value = {RegistrationEnum.password} 
+                          error = {this.state.password_error} 
+                          type = 'password' 
+                          onChange = {this.handlePasswordChange} 
+                          class_name = "password"></TextField>          
                <div className='submit'>
                   <button>Register</button>
                </div>

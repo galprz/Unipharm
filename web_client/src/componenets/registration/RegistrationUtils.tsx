@@ -1,18 +1,19 @@
+export enum RegistrationEnum {
+    email = "Email",
+    password = "Password"
+}
+
 export default class Utils {
 
-    static checkSignUpUserName(username: String)
+    static checkEmail(email: String)
     {
         //Check also for existance in DB
-        return username.length < 5 ? 'Username must be 5 characters long!': '';
+        return email.length < 1 ? 'email must not be empty!': '';
     }
 
-    static checkSignUpPassword(password: String)
+    static checkPassword(password: String)
     {
-        return password.length < 8 ? 'Password must be eight characters long!': '';
-    }
-
-    static validateLogin(username: String, password: String){
-        return true;
+        return password.length < 6 ? 'Password must be 6 characters long!': '';
     }
 
 }
