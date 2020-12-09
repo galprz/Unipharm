@@ -5,7 +5,7 @@ import { TextField } from "../common/TextField";
 import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-import fire from '../../fire';
+import {authClient} from '../../api/init-firebase';
 
 interface SignUpState {
     email : string,
@@ -44,7 +44,7 @@ export class SignUp extends React.Component<any, SignUpState>{
    async handleSignup(event : any){
       event.preventDefault();
       try {
-         const result = await fire.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+         const result = await authClient.createUserWithEmailAndPassword(this.state.email, this.state.password)
          alert("Successfully registered")
       }
       catch(result) {
