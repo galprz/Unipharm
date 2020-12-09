@@ -5,8 +5,8 @@ import { TextField } from "../common/TextField";
 import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
-import firebaseClient from '../../api/init-firebase';
-
+import {authClient} from '../../api/init-firebase';
+import  {FirestoreClient}  from '../../api/firestore'
 interface LoginState {
   email : string,
   password : string,
@@ -45,7 +45,7 @@ export class Login extends React.Component<any, LoginState>{
   async handleLogin(event : any){
     event.preventDefault();
     try {
-      const result = await firebaseClient.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+      const result = await authClient.signInWithEmailAndPassword(this.state.email, this.state.password)
       alert("Successfully signed in")
     }
     catch(result) {
@@ -84,3 +84,5 @@ export class Login extends React.Component<any, LoginState>{
 }
 
 export default Login;
+
+FirestoreClient.read('dev/setting')

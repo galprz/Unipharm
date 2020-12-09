@@ -1,24 +1,19 @@
-import * as firestoreClient  from '../firestore'
-interface SettingsJSON{
-    test: boolean
+import { FirestoreClient } from "../firestore";
+interface SettingsJSON extends JSON {
+  test: boolean;
 }
 
-class SettingsClient{
-    private firestoreClientRef;
-    private settingsPath = 'dev/setting'
-      
-    constructor(){
-        this.firestoreClientRef = new firestoreClient.FirestoreClient()
-    }
+class SettingsClient {
+  private static readonly settingsPath = "dev/setting";
 
-    getSettings(){
-        return this.firestoreClientRef.read(this.settingsPath)
-    }
+  static getSettings(): Promise<SettingsJSON> {
+    return FirestoreClient.read(
+      SettingsClient.settingsPath
+    ) as Promise<SettingsJSON>;
+  }
 
-    saveSettings(newSettings: SettingsJSON){
-        return this.firestoreClientRef.update(this.settingsPath,JSON.parse("{\"test\" : "+newSettings.test+"}"))
-    }
+  static saveSettings(newSettings: SettingsJSON): Promise<void> {
+    return FirestoreClient.update(SettingsClient.settingsPath, newSettings);
+  }
 }
-
-const settingsSingleton = new SettingsClient();
-export default settingsSingleton
+export default SettingsClient;

@@ -1,116 +1,80 @@
-import firebaseClient from './init-firebase'
+import { firestoreClient, deleteFlag } from "./init-firebase";
 
+class DocumentNotFoundError extends Error {}
 
-export class FirestoreClient{
+class DocumentAlreadyExistsError extends Error {}
 
- 
-    private  getDocRef(path : string) {
-        const db = firebaseClient.firestore()
-        let parity = 0
-        let mold : Array<string>
-        let applyPathOn = (databaseRef: any)=>{
-            var intermediateDocRef = databaseRef.collection(path.split('/')[0]).doc(path.split('/')[1])
+export class FirestoreClient {
+  private static fieldsExist(
+    path: string,
+    fields: Array<string>
+  ): Promise<boolean> {
+    return FirestoreClient.pathExists(path).then((res) => {
+      return FirestoreClient.read(path).then((document) => {
+        return (
+          res &&
+          fields.every((field) => Object.keys(document).indexOf(field) > -1)
+        );
+      });
+    });
+  }
 
-            path.split('/').slice(2).forEach((name)=>{
-                mold[parity] = name
-                parity = 1 - parity
-                if(parity===0){
-                    intermediateDocRef = intermediateDocRef.collection(mold[0]).doc(mold[1])
-                }
-            })
-            return intermediateDocRef;
-        }
+  private static pathExists(path: string): Promise<boolean> {
+    return firestoreClient
+      .doc(path)
+      .get()
+      .then((data: { exists: boolean }) => data.exists);
+  }
 
-        return applyPathOn(db);
-    }
+  static read(path: string): Promise<JSON> {
+    return FirestoreClient.pathExists(path).then((res) => {
+      return firestoreClient
+        .doc(path)
+        .get()
+        .then((result: { data: () => any }) => result.data())
+        .catch((error) => {
+          throw new DocumentNotFoundError();
+        });
+    });
+  }
 
-    private async fieldsExist(path: string, fields : Array<string>) : Promise<boolean>{
-        return this.pathExists(path).then(async(res)=>{
-            if(res){
-                const document = await this.read(path)
-                const docKeys = Object.keys(document)
-                let flag = false;
-                fields.forEach((field)=>{if(!docKeys.includes(field)){ flag = true;}})
-                return flag
-            }else{
-                return false
-            }
-        })
-    }
+  static update(path: string, data: JSON): Promise<void> {
+    return FirestoreClient.pathExists(path).then((res) => {
+      if (!res) {
+        throw new DocumentNotFoundError();
+      }
+      return firestoreClient.doc(path).update(data);
+    });
+  }
 
-    private async  pathExists(path: string) : Promise<boolean>{
-        const promise = await this.getDocRef(path).get()
-        return promise.exists;
-    }
+  static create(path: string, data: JSON): Promise<void> {
+    return FirestoreClient.pathExists(path).then((res) => {
+      if (res) {
+        throw new DocumentAlreadyExistsError();
+      }
+      return firestoreClient.doc(path).set(data);
+    });
+  }
 
+  static deleteFields(path: string, fields: Array<string>): Promise<void> {
+    return FirestoreClient.fieldsExist(path, fields).then((res) => {
+      if (!res) {
+        throw new DocumentNotFoundError();
+      }
+      let x: any = {};
+      fields.forEach((field) => {
+        x[field] = deleteFlag;
+      });
+      return firestoreClient.doc(path).update(x);
+    });
+  }
 
-    async read(path: string): Promise<JSON>{
-        return this.pathExists(path).then(async (res) => {
-            if (res) {
-                const promise = await this.getDocRef(path).get()
-                return promise.data()
-            }
-            else {
-                console.log("error - trying to read a non-existing document")
-                return new Promise<JSON>((resolve, undef) => JSON.parse("{}"))
-            }
-        }).catch((err) => {
-            console.log("The following error occured while trying to read: " + err)
-            return new Promise<JSON>((resolve, undef) => JSON.parse("{}"))
-        })
-             
-    }
-
-    async update(path: string, data : JSON) : Promise<void>{
-        this.pathExists(path).then(async (res)=>{
-            if(!res){
-                console.log("error - trying to update a non-existing document");
-            }
-            else{
-                const promise = await this.getDocRef(path).update(data);
-                return promise
-            }
-        }).catch(async (err)=>{alert("The following error occured while trying to update: "+err)})
-    }
-
-    async create(path: string, data : JSON) : Promise<void>{
-        this.pathExists(path).then(async (res)=>{
-            if(res){
-                console.log("error - trying to create an existing document ");
-            }
-            else{
-                const promise = await this.getDocRef(path).set(data);
-                return promise
-            }
-        }).catch(async (err)=>{console.log("The following error occured while trying to create: "+err)})
-
-    }
-
-    async deleteFields(path: string, fields : Array<string>) : Promise<void>{
-        this.fieldsExist(path,fields).then(async (res)=>{
-            if(!res){
-                console.log("error - trying to delete a non-existing document");
-            }
-            else{
-                let x = JSON.parse("{}")
-                fields.forEach((field)=>{x[field]=firebaseClient.firestore.FieldValue.delete()})
-                const promise = await this.getDocRef(path).update(x)
-                return promise
-            }
-        }).catch(async (err)=>{console.log("The following error occured while trying to delete fields: "+err)})
-        
-    }
-
-    async deleteDocument(path : string){
-        this.pathExists(path).then(async (res)=>{
-            if(!res){
-                console.log("error - trying to delete a non-existing document");
-            }
-            else{
-                
-                const promise = await this.getDocRef(path).delete()
-                return promise
-            }
-        }).catch(async (err)=>{console.log("The following error occured while trying to delete a document: "+err)})
-    }
+  static deleteDocument(path: string) {
+    return FirestoreClient.pathExists(path).then((res) => {
+      if (!res) {
+        throw new DocumentNotFoundError();
+      }
+      return firestoreClient.doc(path).delete();
+    });
+  }
 }
