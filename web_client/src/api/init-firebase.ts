@@ -1,4 +1,4 @@
-import * as firebaseClient from "firebase/app";
+import firebaseClient from "firebase/app";
 import firebaseConfig from "./config/firebase.conn.json";
 import "firebase/auth";
 import "firebase/firestore";

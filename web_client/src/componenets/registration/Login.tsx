@@ -6,7 +6,6 @@ import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import {authClient} from '../../api/init-firebase';
-import  {FirestoreClient}  from '../../api/firestore'
 interface LoginState {
   email : string,
   password : string,
@@ -85,4 +84,3 @@ export class Login extends React.Component<any, LoginState>{
 
 export default Login;
 
-FirestoreClient.read('dev/setting')
