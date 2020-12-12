@@ -43,7 +43,7 @@ export class Login extends React.Component<any, LoginState>{
 
   handleLogin(event : any){
     event.preventDefault();
-    authClient.signInWithEmailAndPassword(this.state.email, this.state.password).then(()=>{alert("Successfully signed in")}).catch((result)=>{this.setState({email_error : "Couldn't sign in"}); alert("shit")})
+    authClient.signInWithEmailAndPassword(this.state.email, this.state.password).then(()=>{alert("Successfully signed in")}).catch((result)=>{this.setState({email_error : "Couldn't sign in"});})
   }
 
   render()
