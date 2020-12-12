@@ -41,16 +41,9 @@ export class Login extends React.Component<any, LoginState>{
     this.setState({password, password_error});
   }
 
-  async handleLogin(event : any){
+  handleLogin(event : any){
     event.preventDefault();
-    try {
-      const result = await authClient.signInWithEmailAndPassword(this.state.email, this.state.password)
-      alert("Successfully signed in")
-    }
-    catch(result) {
-      this.setState({email_error : "Couldn't sign in"})
-    }
-    // TODO: If the sign in was successful open the home screen once we have one
+    authClient.signInWithEmailAndPassword(this.state.email, this.state.password).then(()=>{alert("Successfully signed in")}).catch((result)=>{this.setState({email_error : "Couldn't sign in"}); alert("shit")})
   }
 
   render()
