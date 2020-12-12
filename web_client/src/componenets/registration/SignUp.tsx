@@ -41,9 +41,15 @@ export class SignUp extends React.Component<any, SignUpState>{
       this.setState({password, password_error});
    }
 
-   handleSignup(event : any){
+   async handleSignup(event : any){
       event.preventDefault();
-      authClient.createUserWithEmailAndPassword(this.state.email, this.state.password).then(()=>{alert("Successfully registered")}).catch((err)=>{this.setState({email_error : "Couldn't sign up"})})
+      try {
+         await authClient.createUserWithEmailAndPassword(this.state.email, this.state.password)
+         alert("Successfully registered")
+      }
+      catch(result) {
+         this.setState({email_error : "Couldn't sign up"})
+      }
       // TODO: If the sign up was successful open the home screen once we have one
    }
 
