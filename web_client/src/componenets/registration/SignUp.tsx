@@ -44,7 +44,7 @@ export class SignUp extends React.Component<any, SignUpState>{
    async handleSignup(event : any){
       event.preventDefault();
       try {
-         const result = await authClient.createUserWithEmailAndPassword(this.state.email, this.state.password)
+         await authClient.createUserWithEmailAndPassword(this.state.email, this.state.password)
          alert("Successfully registered")
       }
       catch(result) {
