@@ -13,7 +13,7 @@ def drawBarcodeResOnImage(image, barcode, bartype, data):
     return image_
 
 
-def readBarcode(imagePath):
+def readBarcodesFromImage(imagePath):
     x = BarcodeDetector.BarcodeDetector().loadImage(
         imagePath).getLargestContours(4).toBarcodeObjects().get()
     final_barcodes = []
@@ -42,7 +42,3 @@ def readBarcode(imagePath):
             f_image = drawBarcodeResOnImage(f_image, *barcode)
         cv2.waitKey(0)
         cv2.imwrite("result.jpg", f_image)
-
-
-if __name__ == "__main__":
-    readBarcode('D:\\Unifarm\\U\\Unipharm\\backend\\algo\\md\\P2.jpg')
