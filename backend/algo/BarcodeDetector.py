@@ -21,8 +21,9 @@ class BarcodeDetector(object):
         cnts = cv2.findContours(self.tempImage.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
-        self.tempResArr = sorted(cnts, key=cv2.contourArea, reverse=True)[
-            :numContours]
+        self.tempResArr = sorted(cnts, key=cv2.contourArea, reverse=True)
+        top = min(numContours, len(self.tempResArr))
+        self.tempResArr = self.tempResArr[:top]
         return self
 
     def toBarcodeObjects(self):
@@ -39,11 +40,13 @@ class BarcodeDetector(object):
     def save(self):
         for b in self.tempResArr:
             cv2.drawContours(self.origImage, [b.getBox()], -1, (0, 255, 0), 3)
-        print("Ich bin du")
-        cv2.imwrite("marked.jpg", self.origImage)
+        cv2.imwrite("DetectedBarcodes.jpg", self.origImage)
 
     def saveCrops(self):
         count = 0
         for b in self.tempResArr:
-            cv2.imwrite('ppp{}.jpg'.format(count), b.extractToImage)
+            cv2.imwrite('crop_{}.jpg'.format(count), b.extractToImage())
             count += 1
+
+    def get(self):
+        return self.tempResArr
