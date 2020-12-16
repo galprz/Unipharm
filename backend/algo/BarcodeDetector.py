@@ -1,6 +1,6 @@
 import cv2
 import imutils
-from BarcodeCandidate import PossibleBarcode
+from BarcodeCandidate import BarcodeCandidate
 import ImagePreproccessor
 
 
@@ -27,7 +27,7 @@ class BarcodeDetector(object):
         return self
 
     def to_barcode_objects(self):
-        self.tempResArr = [PossibleBarcode(
+        self.tempResArr = [BarcodeCandidate(
             x, self.origImage) for x in self.tempResArr]
         return self
 
