@@ -6,16 +6,16 @@ class ImagePreproccessor(object):
     def __init__(self):
         self.image = None
 
-    def loadImage(self, imagePath):
+    def load_image(self, imagePath):
         self.image = cv2.imread(imagePath)
         return self
 
-    def toGrayscale(self):
+    def to_grayscale(self):
         if self.image is not None:
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             return self
 
-    def Scharr(self):
+    def process_grayscale(self):
         if self.image is not None:
             gray = self.image
             ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
@@ -37,5 +37,5 @@ class ImagePreproccessor(object):
             self.image = cv2.dilate(closed, None, iterations=4)
             return self
 
-    def get(self):
+    def get_image(self):
         return self.image

@@ -11,13 +11,13 @@ class BarcodeDetector(object):
         self.ipp = ImagePreproccessor.ImagePreproccessor()
         self.tempResArr = None
 
-    def loadImage(self, imagePath):
+    def load_image(self, imagePath):
         self.origImage = cv2.imread(imagePath)
-        self.tempImage = self.ipp.loadImage(
-            imagePath).toGrayscale().Scharr().get()
+        self.tempImage = self.ipp.load_image(
+            imagePath).to_grayscale().process_grayscale().get_image()
         return self
 
-    def getLargestContours(self, numContours=4):
+    def get_largest_contours(self, numContours=4):
         cnts = cv2.findContours(self.tempImage.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
@@ -26,27 +26,27 @@ class BarcodeDetector(object):
         self.tempResArr = self.tempResArr[:top]
         return self
 
-    def toBarcodeObjects(self):
+    def to_barcode_objects(self):
         self.tempResArr = [PossibleBarcode(
             x, self.origImage) for x in self.tempResArr]
         return self
 
-    def display(self):
+    def display_detected_barcodes(self):
         for b in self.tempResArr:
             cv2.drawContours(self.origImage, [b.getBox()], -1, (0, 255, 0), 3)
         cv2.imshow("Image", self.origImage)
         cv2.waitKey(0)
 
-    def save(self):
+    def save_in_single_file(self):
         for b in self.tempResArr:
             cv2.drawContours(self.origImage, [b.getBox()], -1, (0, 255, 0), 3)
         cv2.imwrite("DetectedBarcodes.jpg", self.origImage)
 
-    def saveCrops(self):
+    def save_in_seperate_files(self):
         count = 0
         for b in self.tempResArr:
-            cv2.imwrite('crop_{}.jpg'.format(count), b.extractToImage())
+            cv2.imwrite('crop_{}.jpg'.format(count), b.extract_to_image())
             count += 1
 
-    def get(self):
+    def get_all_results(self):
         return self.tempResArr

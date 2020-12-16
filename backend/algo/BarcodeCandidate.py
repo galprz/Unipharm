@@ -20,20 +20,26 @@ class PossibleBarcode(object):
         self.max_x = int(np.max(box[:, 0])) + 0
         self.box = box
 
-    def minX(self, _expanded=False):
+    def get_min_x(self, _expanded=False):
         return self.min_x if not _expanded else max(0, self.min_x-PossibleBarcode.expansionFactor)
 
-    def minY(self, _expanded=False):
+    def get_min_y(self, _expanded=False):
         return self.min_y if not _expanded else max(0, self.min_y-PossibleBarcode.expansionFactor)
 
-    def maxX(self, _expanded=False):
+    def get_max_x(self, _expanded=False):
         return self.max_x if not _expanded else min(self.image.shape[1], self.max_x+PossibleBarcode.expansionFactor)
 
-    def maxY(self, _expanded=False):
+    def get_max_y(self, _expanded=False):
         return self.max_y if not _expanded else min(self.image.shape[0], self.max_y+PossibleBarcode.expansionFactor)
 
-    def extractToImage(self):
-        return self.image[self.minY(_expanded=True):self.maxY(_expanded=True), self.minX(_expanded=True):self.maxX(_expanded=True)]
+    def extract_to_image(self):
+        return self.image[self.get_min_y(_expanded=True):self.get_max_y(_expanded=True), self.get_min_x(_expanded=True):self.get_max_x(_expanded=True)]
 
-    def getBox(self):
+    def get_box(self):
         return self.box
+
+    def get_top_left(self, _expanded=False):
+        return (self.get_min_x(_expanded), self.get_min_y(_expanded))
+
+    def get_bottom_right(self, _expanded=False):
+        return (self.get_max_x(_expanded), self.get_max_y(_expanded))
