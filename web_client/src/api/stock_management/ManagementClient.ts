@@ -21,17 +21,17 @@ export class ManagementClient {
         return this.acualLocationsPath + "/" + item.loc.toString();     // the locations are unique, so they can be the identifiers
     }
 
-    static add(item: ItemJSON): Promise<void> {
+    static addItemActualLocation(item: ItemJSON): Promise<void> {
         let path = this.docPath(item);
         return FirestoreClient.create(path, item);
     }
 
-    static update(item: ItemJSON): Promise<void> {
+    static updateItemActualLocation(item: ItemJSON): Promise<void> {
         let path = this.docPath(item);
         return FirestoreClient.update(path, item);
     }
 
-    static delete(item: ItemJSON): Promise<void> {
+    static deleteItemActualLocation(item: ItemJSON): Promise<void> {
         let path = this.docPath(item);
         return FirestoreClient.deleteDocument(path);
     }
