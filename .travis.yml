@@ -8,7 +8,7 @@ install:
   - conda update -q conda
   - conda info -a
   - pwd
-  - conda create -q -f  `pwd`/Unipharm.yml
+  - conda env create -q -f  /home/travis/build/galprz/unipharm/Unipharm.yml
   - conda activate test-environment
   - python setup.py install
 node_js:
