@@ -89,4 +89,4 @@ dependencies:
   - zeromq=4.3.3=h0e60522_3
   - zlib=1.2.11=h62dcd97_4
   - zstd=1.4.5=h1f3a1b7_2
-prefix: C:\Users\User\Anaconda3\envs\Unipharm
+prefix: /home/travis/miniconda/envs/test-environment 
