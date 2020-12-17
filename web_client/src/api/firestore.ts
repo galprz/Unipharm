@@ -26,6 +26,14 @@ export class FirestoreClient {
       .then((data: { exists: boolean }) => data.exists);
   }
 
+  static collectionPathExists(path: string): Promise<boolean> {
+    return firestoreClient
+      .collection(path)
+      .limit(1)
+      .get()
+      .then(query => !query.empty);
+  }
+
   static read(path: string): Promise<JSON> {
     return FirestoreClient.pathExists(path).then((res) => {
       return firestoreClient
@@ -69,7 +77,7 @@ export class FirestoreClient {
     });
   }
 
-  static deleteDocument(path: string) {
+  static deleteDocument(path: string): Promise<void> {
     return FirestoreClient.pathExists(path).then((res) => {
       if (!res) {
         throw new DocumentNotFoundError();
