@@ -7,8 +7,8 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - cat ./Unipharm.yml
-  - conda create -q -n test-environment -f ./Unipharm.yml
+  - cat `locate Unipharm.yml`
+  - conda create -q -n test-environment -f  `locate Unipharm.yml`
   - conda activate test-environment
   - python setup.py install
 node_js:
