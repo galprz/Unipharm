@@ -4,7 +4,7 @@
   "description": "This is the main repo of the Unifarm project",
   "main": "index.js",
   "scripts": {
-    "test": "cd ./web_client && npm install && react-scripts build"
+    "test": "cd ./web_client && npm install && react-scripts build && python -m unittest"
   },
   "repository": {
     "type": "git",

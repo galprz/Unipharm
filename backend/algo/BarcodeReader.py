@@ -4,8 +4,7 @@ from BarcodeDetector import BarcodeDetector
 import ImageMarker
 import BarcodeCandidate
 import numpy
-import json
-
+import pyzbarConfig
 Image = numpy.ndarray
 BarcodeType = str
 BarcodeData = str
@@ -56,7 +55,8 @@ def read_barcodes_from_image(image_path) -> Barcodes:
     final_barcodes = []
     for barcode_candidate in candidates:
         image = barcode_candidate.extract_to_image()
-        barcodes = pyzbar.decode(image)
+        barcodes = pyzbar.decode(
+            image, symbols=pyzbarConfig.SUPPORTED_BARCODE_TYPES)
         for decoded_barcode in barcodes:
             final_barcodes.append(DecodedBarcode(
                 barcode_candidate,
