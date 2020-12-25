@@ -128,9 +128,9 @@ class WarehouseScene extends React.Component {
     var geometry = new THREE.PlaneGeometry( 5, 10, 32 );
     var material = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
     var yOffset = 3;
-    for(var i = 0; i < locations.length; i++){
+    for(var j = 0; j < locations.length; j++){
       var plane = new THREE.Mesh( geometry, material );
-      plane.position.set(locations[i][0], locations[i][1] - yOffset, locations[i][2]);
+      plane.position.set(locations[j][0], locations[j][1] - yOffset, locations[j][2]);
       plane.rotation.x = Math.PI / 2;
       plane.rotation.z = Math.PI / 2;
       this.scene.add( plane );
