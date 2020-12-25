@@ -6,6 +6,9 @@ import Utils, { RegistrationEnum } from './RegistrationUtils';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import {authClient} from '../../api/init-firebase';
+import connectStore from "../../store/connect"
+import { login } from "../../store/actions";
+
 interface LoginState {
   email : string,
   password : string,
@@ -13,6 +16,7 @@ interface LoginState {
   password_error : string
 };
 
+@connectStore({ login })
 export class Login extends React.Component<any, LoginState>{
 
   constructor(props: {}){
@@ -46,11 +50,11 @@ export class Login extends React.Component<any, LoginState>{
     try {
       await authClient.signInWithEmailAndPassword(this.state.email, this.state.password)
       alert("Successfully signed in")
+      this.props.history.push('/Home');
     }
     catch(result) {
       this.setState({email_error : "Couldn't sign in"})
     }
-    // TODO: If the sign in was successful open the home screen once we have one
   }
 
   render()
@@ -71,7 +75,7 @@ export class Login extends React.Component<any, LoginState>{
                      onChange = {this.handlePasswordChange} 
                      class_name = "password"></TextField>            
             <div className='submit'>
-              <button>Login</button>
+              <button onClick={() => login(this.state.email)}>Login</button>
             </div>
             <Button component={Link} to="/SignUp">Or click here to sign up</Button>
           </form>
