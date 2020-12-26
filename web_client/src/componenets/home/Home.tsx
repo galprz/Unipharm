@@ -5,6 +5,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import Utils from "./HomeUtils";
 import Button from '@material-ui/core/Button';
 import "./HomeStyle.css";
+import consts from "./HomeConsts.json";
 
 class WarehouseScene extends React.Component {
   mount: any;
@@ -17,9 +18,9 @@ class WarehouseScene extends React.Component {
   frameId: any;
   loader: any;
   forklift: any;
-  direction: number = 0;
+  direction: number = consts.forklift.direction.still;
   videoStarted: boolean = false;
-  geometry = new THREE.BoxGeometry(5, 5, 5);
+  geometry = new THREE.BoxGeometry(consts.boxEdge, consts.boxEdge, consts.boxEdge);
   green = new THREE.MeshBasicMaterial({
     color: "#0F0"
   });
@@ -44,7 +45,7 @@ class WarehouseScene extends React.Component {
   componentDidMount() {
     this.scene = new THREE.Scene();
 
-    var skyboxGeo = new THREE.BoxGeometry(10000, 10000, 10000);
+    var skyboxGeo = new THREE.BoxGeometry(consts.skyboxEdge, consts.skyboxEdge, consts.skyboxEdge);
     var skybox = new THREE.Mesh(skyboxGeo, this.createMaterialArray());
     this.scene.add(skybox);
 
@@ -56,7 +57,8 @@ class WarehouseScene extends React.Component {
 
     //add Camera
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 45, 30000);
-    this.camera.position.set(58, 45, 30);
+    var cameraPosition = consts.camera.position
+    this.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     //Camera Controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -66,16 +68,13 @@ class WarehouseScene extends React.Component {
     this.controls.update();
 
     //LIGHTS
-    var lights = [];
-    lights[0] = new THREE.PointLight(0x304ffe, 1, 0);
-    lights[1] = new THREE.PointLight(0xffffff, 1, 0);
-    lights[2] = new THREE.PointLight(0xffffff, 1, 0);
-    lights[0].position.set(0, 200, 0);
-    lights[1].position.set(100, 200, 100);
-    lights[2].position.set(-100, -200, -100);
-    this.scene.add(lights[0]);
-    this.scene.add(lights[1]);
-    this.scene.add(lights[2]);
+    for(var i = 0; i < consts.lights.length; i++)
+    {
+      var light = new THREE.PointLight(0xffffff, 1, 0);
+      var lightPosition = consts.lights[i];
+      light.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
+      this.scene.add(light);
+    }
 
     this.addModels();
 
@@ -86,14 +85,14 @@ class WarehouseScene extends React.Component {
   }
 
   onClick(myThis: any){
-      if(!(myThis.direction === 0)) //We started moving already
+      if(!(myThis.direction === consts.forklift.direction.still)) //We started moving already
       {
         myThis.direction *= -1;
         myThis.forklift.rotation.y += Math.PI;
       }
       else //First time moving
       {
-        myThis.direction = -1;
+        myThis.direction = consts.forklift.direction.backwards;
       }
       this.videoStarted = true;
   }
@@ -136,38 +135,34 @@ class WarehouseScene extends React.Component {
       this.scene.add( plane );
     }
 
-    var floorGeometry = new THREE.PlaneGeometry( 150, 250, 32 );
-    var floorGeometry2 = new THREE.PlaneGeometry( 150, 154, 32 );
-    var floorGeometry3 = new THREE.PlaneGeometry( 154, 250, 32 );
+    var height = consts.warehouse.height;
+    var width = consts.warehouse.width;
+    var sideGeometry = new THREE.PlaneGeometry(width, height);
+    var backGeometry = new THREE.PlaneGeometry(height, height);
     var floorTexture = new THREE.TextureLoader().load("/wall.jfif");
-    var floorTexture2 = new THREE.TextureLoader().load("/wall_logo.png");
-    var floorTexture3 = new THREE.TextureLoader().load("/wall_logo_rotate.png");
+    var sideTexture = new THREE.TextureLoader().load("/wall_logo.png");
     var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-    var floorMaterial2 = new THREE.MeshBasicMaterial( { map: floorTexture2, side: THREE.DoubleSide } );
-    var floorMaterial3 = new THREE.MeshBasicMaterial( { map: floorTexture3, side: THREE.DoubleSide } );
-    var floor = new THREE.Mesh( floorGeometry, floorMaterial );
-    floor.position.set(-35, -3, 30);
+    var sideMaterial = new THREE.MeshBasicMaterial( { map: sideTexture, side: THREE.DoubleSide } );
+    var floor = new THREE.Mesh(sideGeometry, floorMaterial);
+    var warehousePosition = consts.warehouse.position;
+    floor.position.set(warehousePosition.x, warehousePosition.y, warehousePosition.z);
     floor.rotation.x = Math.PI / 2;
-    floor.rotation.z = Math.PI / 2;
     this.scene.add( floor );
-    var floor2 = new THREE.Mesh( floorGeometry, floorMaterial );
-    floor2.position.set(-35, 151, 30);
-    floor2.rotation.x = Math.PI / 2;
-    floor2.rotation.z = Math.PI / 2;
-    this.scene.add( floor2 );
-    var floor3 = new THREE.Mesh( floorGeometry2, floorMaterial2);
-    floor3.position.set(-160, 74, 30);
-    floor3.rotation.y = - Math.PI / 2;
-    this.scene.add( floor3 );
-    var floor4 = new THREE.Mesh( floorGeometry3, floorMaterial3 );
-    floor4.position.set(-35, 74, 105);
-    floor4.rotation.z = Math.PI / 2;
-    this.scene.add( floor4 );
-    var floor5 = new THREE.Mesh( floorGeometry3, floorMaterial3 );
-    floor5.position.set(-35, 74, -45);
-    floor5.rotation.z = Math.PI / 2;
-    floor5.rotation.y = Math.PI;
-    this.scene.add( floor5 );
+    var ceiling = new THREE.Mesh(sideGeometry, floorMaterial);
+    ceiling.position.set(warehousePosition.x, warehousePosition.y + height, warehousePosition.z);
+    ceiling.rotation.x = Math.PI / 2;
+    this.scene.add( ceiling );
+    var back = new THREE.Mesh(backGeometry, sideMaterial);
+    back.position.set(warehousePosition.x - width/2, warehousePosition.y + height/2, warehousePosition.z);
+    back.rotation.y = - Math.PI / 2;
+    this.scene.add( back );
+    var side1 = new THREE.Mesh(sideGeometry, sideMaterial);
+    side1.position.set(warehousePosition.x, warehousePosition.y + height/2, warehousePosition.z + height/2);
+    this.scene.add( side1 );
+    var side2 = new THREE.Mesh(sideGeometry, sideMaterial);
+    side2.position.set(warehousePosition.x, warehousePosition.y + height/2, warehousePosition.z - height/2);
+    side2.rotation.y = Math.PI;
+    this.scene.add( side2 );
 
     this.forklift = new THREE.Object3D();
     this.scene.add(this.forklift);
@@ -181,8 +176,9 @@ class WarehouseScene extends React.Component {
       // Here the loaded data is assumed to be an object
        ( obj ) => {
         // Add the loaded object to the scene
-        this.forklift.scale.multiplyScalar(0.03);
-        this.forklift.position.set(23, -2, 13);
+        var forkliftPosition = consts.forklift.position;
+        this.forklift.position.set(forkliftPosition.x, forkliftPosition.y, forkliftPosition.z);
+        this.forklift.scale.multiplyScalar(consts.forklift.sizeMultiplyer);
         this.forklift.model = obj;
         this.forklift.add(this.forklift.model);
       }
@@ -216,7 +212,7 @@ class WarehouseScene extends React.Component {
   };
   animate = () => {
     if (this.freedomMesh) this.freedomMesh.rotation.y += 0.01;
-    this.forklift.position.x += 0.06 * this.direction;
+    this.forklift.position.x += consts.forklift.speed * this.direction;
     if(this.forklift.position.x < -150 || this.forklift.position.x > 23)
     {
       this.forklift.rotation.y += Math.PI;
@@ -253,7 +249,7 @@ class WarehouseScene extends React.Component {
     }
     if(this.forklift.position.x < -140)
     {
-      this.direction = 0;
+      this.direction = consts.forklift.direction.still;
     }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
