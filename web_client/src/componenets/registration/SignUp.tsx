@@ -46,11 +46,11 @@ export class SignUp extends React.Component<any, SignUpState>{
       try {
          await authClient.createUserWithEmailAndPassword(this.state.email, this.state.password)
          alert("Successfully registered")
+         this.props.history.push('/Login');
       }
       catch(result) {
          this.setState({email_error : "Couldn't sign up"})
       }
-      // TODO: If the sign up was successful open the home screen once we have one
    }
 
     render() { 

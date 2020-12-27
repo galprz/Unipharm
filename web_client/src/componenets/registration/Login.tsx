@@ -50,11 +50,11 @@ export class Login extends React.Component<any, LoginState>{
     try {
       await authClient.signInWithEmailAndPassword(this.state.email, this.state.password)
       alert("Successfully signed in")
+      this.props.history.push('/Home');
     }
     catch(result) {
       this.setState({email_error : "Couldn't sign in"})
     }
-    // TODO: If the sign in was successful open the home screen once we have one
   }
 
   render()

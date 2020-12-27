@@ -1,0 +1,51 @@
+{
+    "warehouse":{
+        "height": 150,
+        "width": 250,
+        "position":{
+            "x": -35,
+            "y": -3,
+            "z": 30
+        }
+    },
+    "boxEdge": 5,
+    "skyboxEdge": 10000,
+    "forklift": {
+        "position":{
+            "x": 23,
+            "y": -2,
+            "z": 13
+        },
+        "direction":{
+            "still": 0,
+            "backwards": -1,
+            "forward": 1
+        },
+        "sizeMultiplyer": 0.03,
+        "speed": 0.06
+    },
+    "camera": {
+        "position":{
+            "x": 58,
+            "y": 45,
+            "z": 30
+        }
+    },
+    "lights": [
+        {
+            "x": 0,
+            "y": 200,
+            "z": 0
+        },
+        {
+            "x": 100,
+            "y": 200,
+            "z": 100
+        },
+        {
+            "x": -100,
+            "y": -200,
+            "z": -100
+        }
+    ]  
+}
