@@ -1,28 +1,16 @@
+import {ManagementClient} from "../../api/stock_management/ManagementClient";
+
 export default class Utils {
 
-    static getLocations()
+    static async getLocations()
     {
-        const locations : Array<[number, number, number]> = []
-        var xDistance = 10;
-        var yDistance = 7;
-        var zDistance = 30;
-        var xOffset = -135;
-        var yOffset = 5;
-
-        for(var i = 0; i < 15; i++){
-            for(var j = 0; j < 20; j++){
-                for(var k = 0; k < 3; k++){
-                    locations.push([xDistance * i + xOffset, yDistance * j + yOffset, zDistance * k]);
-                }
-            }
-        }
-
+        const locations : Array<[number, number, number]> = await ManagementClient.getAllLocations();
         return locations;
     }
 
-    static getColor(index: number)
+    static getColor(x: number, y: number, z: number)
     {
-        return index % 90; //This means nothing
+        return x % 15; //This means nothing
     }
 
 }
