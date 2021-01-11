@@ -42,7 +42,7 @@ class WarehouseScene extends React.Component {
     });
     return materialArray;
   }
-  componentDidMount() {
+  async componentDidMount() {
     this.scene = new THREE.Scene();
 
     var skyboxGeo = new THREE.BoxGeometry(consts.skyboxEdge, consts.skyboxEdge, consts.skyboxEdge);
@@ -76,12 +76,22 @@ class WarehouseScene extends React.Component {
       this.scene.add(light);
     }
 
-    this.addModels();
+    await this.addModels();
 
     this.renderer.render(this.scene, this.camera);
 
     //start animation
     this.start();
+  }
+
+  cubeByLoc(x: number, y: number, z: number){
+    for(var i = 0; i < this.cubes.length; i++)
+    {
+      var location = this.cubes[i].position;
+      if(x === location.x && y === location.y && z === location.z)
+        return i;
+    }
+    return 0; //Should never get here
   }
 
   onClick(myThis: any){
@@ -97,9 +107,9 @@ class WarehouseScene extends React.Component {
       this.videoStarted = true;
   }
 
-  addModels() {
+  async addModels() {
     // -----Step 1--------
-    var locations = Utils.getLocations();
+    var locations = await Utils.getLocations();
 
     for(var i = 0; i < locations.length; i++){
             var mesh : THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>;
@@ -226,28 +236,32 @@ class WarehouseScene extends React.Component {
     }
     var prevGreen = false;
     var xDistance = 10;
-    for(var i = 0; i > -140; i -= xDistance)
+    var y = 5;
+    var z = 0;
+    var xStart = 5;
+    var xEnd = -135;
+    for(var i = xStart + 5; i > xEnd; i -= xDistance)
     {
       if(this.forklift.position.x < i)
       {
-          var color = Utils.getColor(840 + 6*i);
+          var color = Utils.getColor(i, y, z);
           if(prevGreen)
           {
-            this.loadCubeTexture(840 + 6*(i + xDistance), this.white);
+            this.loadCubeTexture(this.cubeByLoc(i + xDistance + 5, y, z), this.white);
           }
           if(color === 0)
           {
-            this.loadCubeTexture(840 + 6*i, this.green);
+            this.loadCubeTexture(this.cubeByLoc(i + 5, y, z), this.green);
             prevGreen = true;
           }
           else
           {
-            this.loadCubeTexture(840 + 6*i, this.red);
+            this.loadCubeTexture(this.cubeByLoc(i + 5, y, z), this.red);
             prevGreen = false;
           }
       }
     }
-    if(this.forklift.position.x < -140)
+    if(this.forklift.position.x < xEnd + 5)
     {
       this.direction = consts.forklift.direction.still;
     }

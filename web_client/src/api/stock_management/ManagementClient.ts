@@ -4,7 +4,7 @@ import { FirestoreClient } from "../firestore";
 class CollectionNotFoundError extends Error {}
 class MaterialDoesNotExistError extends Error {}
 
-type Loc = number;
+type Loc = [number, number, number];    // format of [x, y, z] such that [index in shelf, shelf, row]
 type Material = string;
 
 export interface ItemJSON extends JSON {
@@ -77,6 +77,29 @@ export class ManagementClient {
                                 if (querySnapshot.empty) {
                                     throw new MaterialDoesNotExistError();
                                 }
+                                let locations = new Array<Loc>();
+                                querySnapshot.forEach(
+                                    (doc) => locations.push(doc.get(this.locField))
+                                );
+                                return locations;
+                            }
+                        )
+                }
+            );
+    }
+
+    static getAllLocations(): Promise<Array<Loc>> {
+        return FirestoreClient.collectionPathExists(this.acualLocationsPath)
+            .then(
+                (exists) => {
+                    if (!exists) {
+                        throw new CollectionNotFoundError();
+                    }
+                    let acualLocationsRef = db.collection(this.acualLocationsPath);
+                    return acualLocationsRef
+                        .get()
+                        .then(
+                            (querySnapshot) => {
                                 let locations = new Array<Loc>();
                                 querySnapshot.forEach(
                                     (doc) => locations.push(doc.get(this.locField))
