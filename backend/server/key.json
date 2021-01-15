@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "unifarm-f9b90",
+  "private_key_id": "8b7fb04ad086dead620c24a64dbaa0bd600c2eba",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3pJodw+DHoXfl\na/qtPyvfo+MT98gfvFgD17uPl65DZYm+dPNMVvpU6A/5T9byLJ1+9JaeU12XXE88\np+lOKDJQ6PHmGbUvgQpoSp3N9EvFbpLlToFZ8uI7Uq+8M2YLhNE1eSW34Fg8Lkkh\nBaD1bPsPGYBAC8zFNVvAi9u+7f+Oq5WhUWZ9JnnbMDr/PR4OudkaqcXPumrl7a1g\nrpOfzXd68HA+UIt3WtfQOT+URlRGC37NM7ANI9+fit5m0E7PfLUpFU7bgH07dFtG\nH6lrLuC8Y0OXAPiXyt3ZKDMXffSArk94Ta2T9gnH20ckeDy2rcbyCD4mJLLfsfsx\nijpiCeH9AgMBAAECggEAM23H8VUFUrLgAmKCgdkins9lTRbDt0uGNJFKiBSY62v4\nrttOtY7YLUYODypyTkD7XG3/7lf3ameiEyEM/+PW73zFHcUOTj7rnLhkyCRFwgVM\n4yXgqMGR5L4r099rEQfBlSGX1A5id3wY48QRRxodlyVzmrwTPRlL2Djysd4yBxCA\n20jppoYjLS/AlZPVV6ztf84Ev+OScfq4cYqX3CLeUS74T7cKJQJ4O9gN9ONEHQ/w\n77BmFKisTOVJVkanBxKAk70O94d6Rao9ZTZG8BV8BpnigKWVcqn5081t2KLxK0cX\nebyI85E7Dd14E2UhBkDBVFo2NBvxuczxZwSgzK3LWwKBgQD4F4xT4KLT2AFrgaep\nvyAgIT6yz5rs9cDjM3ZSZu3P5EiOum6LX8PA/EPN47IXFWVA13KRZWaQnyarNsO1\n9/4AJ3+BHSiOeu4MZk/vlUZFCM28zlfVovld8PJHMkdzLLhgfY7vbt00eKgBtQLd\nOCLSFxpU8aarK95ytwWoEs7uswKBgQC9fyT5n7flYAC1Js4+9WZrFXJ1honJh73l\nGaSOw7Y3BKCJhtlRyyivXn07x8kxlmMxTpt4M9UllMPhyqNm2RPhyKkJF6CVx+cy\n9uLwBtHEL2sUlOzePlrVq9a+Qzo0Rkfehdu18uiT0iAn6mx9NLCNjXlQ/y4LwEJE\nCrU5yElEjwKBgGLkoB9fUAi59fbwu/DCKwAjwGZuswb5/2WRwfye4vUXvoSGdEJC\nbjmjVTPhK8Bf2vi56QVkMjo79qIRNnp23F0bYYwKH3yMLA/tSLfr/RLPq5MzfXe/\nez+jKDCRLkIO9YAhDLUMsEiWQAJOMVIVamvsoaZynUlmN0nrAuo4dRxZAoGAY0xK\n7du6G6Iw/Lw2+1rQrnBwqBE2Brrw0Sqcxorb4vyzux1Ep83TpgHXkgng7fEmTWIp\nqdVPbgAEnT74XR6HgpsJqNAOwC4eguBIjwqjxTAr5n8bmGIIa0s+njjQOTBS3NI8\nDZ4aLcvAOepnqzx+/84QslblpBa9IraRvJOtgRUCgYEAhnY8ljIWrJ342jdHoyfO\n/CoBQF8R5lxkoqr8R3bA8ecGNh/aMvLsYUtVbZU1Gbh4uD80oo2pBzBRCTDOcVRc\nWNcKZ/k5m1Et8xL1t1dA5vI1hTWhxBnEGZ0BcJefsXOTL4QtXjJ8hirJ0hx8p5Nb\nCqaro3hhw0psdgolcR6J8UM=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-dqbxj@unifarm-f9b90.iam.gserviceaccount.com",
+  "client_id": "112966713654346333872",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-dqbxj%40unifarm-f9b90.iam.gserviceaccount.com"
+}
