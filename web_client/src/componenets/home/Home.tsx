@@ -14,10 +14,12 @@ class WarehouseScene extends React.Component {
   camera!: THREE.PerspectiveCamera;
   controls!: OrbitControls;
   cubes: Array<THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>> = [];
+  materials: Array<String> = [];
   freedomMesh: any;
   frameId: any;
   loader: any;
   forklift: any;
+  prevGreen: boolean = false;
   direction: number = consts.forklift.direction.still;
   videoStarted: boolean = false;
   geometry = new THREE.BoxGeometry(consts.boxEdge, consts.boxEdge, consts.boxEdge);
@@ -110,6 +112,7 @@ class WarehouseScene extends React.Component {
   async addModels() {
     // -----Step 1--------
     var locations = await Utils.getLocations();
+    this.materials = await Utils.getMaterials();
 
     for(var i = 0; i < locations.length; i++){
             var mesh : THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>;
@@ -220,7 +223,7 @@ class WarehouseScene extends React.Component {
   stop = () => {
     cancelAnimationFrame(this.frameId);
   };
-  animate = () => {
+  animate = async () => {
     if (this.freedomMesh) this.freedomMesh.rotation.y += 0.01;
     this.forklift.position.x += consts.forklift.speed * this.direction;
     if(this.forklift.position.x < -150 || this.forklift.position.x > 23)
@@ -234,34 +237,34 @@ class WarehouseScene extends React.Component {
       vid.play();
       this.videoStarted = true;
     }
-    var prevGreen = false;
     var xDistance = 10;
     var y = 5;
     var z = 0;
     var xStart = 5;
     var xEnd = -135;
-    for(var i = xStart + 5; i > xEnd; i -= xDistance)
+    var forkliftOffset = 5;
+    for(var i = xStart + forkliftOffset; i > xEnd; i -= xDistance)
     {
-      if(this.forklift.position.x < i)
+      if(i - 0.07 < this.forklift.position.x && this.forklift.position.x < i)
       {
-          var color = Utils.getColor(i, y, z);
-          if(prevGreen)
+          var color = await Utils.getColor(i + forkliftOffset, y, z, this.materials[this.cubeByLoc(i + forkliftOffset, y, z)]);
+          if(this.prevGreen)
           {
-            this.loadCubeTexture(this.cubeByLoc(i + xDistance + 5, y, z), this.white);
+            this.loadCubeTexture(this.cubeByLoc(i + xDistance + forkliftOffset, y, z), this.white);
           }
-          if(color === 0)
+          if(color)
           {
-            this.loadCubeTexture(this.cubeByLoc(i + 5, y, z), this.green);
-            prevGreen = true;
+            this.loadCubeTexture(this.cubeByLoc(i + forkliftOffset, y, z), this.green);
+            this.prevGreen = true;
           }
           else
           {
-            this.loadCubeTexture(this.cubeByLoc(i + 5, y, z), this.red);
-            prevGreen = false;
+            this.loadCubeTexture(this.cubeByLoc(i + forkliftOffset, y, z), this.red);
+            this.prevGreen = false;
           }
       }
     }
-    if(this.forklift.position.x < xEnd + 5)
+    if(this.forklift.position.x < xEnd + forkliftOffset)
     {
       this.direction = consts.forklift.direction.still;
     }

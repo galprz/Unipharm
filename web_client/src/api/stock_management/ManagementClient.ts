@@ -110,4 +110,27 @@ export class ManagementClient {
                 }
             );
     }
+
+    static getAllMaterials(): Promise<Array<String>> {
+        return FirestoreClient.collectionPathExists(this.acualLocationsPath)
+            .then(
+                (exists) => {
+                    if (!exists) {
+                        throw new CollectionNotFoundError();
+                    }
+                    let acualLocationsRef = db.collection(this.acualLocationsPath);
+                    return acualLocationsRef
+                        .get()
+                        .then(
+                            (querySnapshot) => {
+                                let materials = new Array<String>();
+                                querySnapshot.forEach(
+                                    (doc) => materials.push(doc.get(this.materialField))
+                                );
+                                return materials;
+                            }
+                        )
+                }
+            );
+    }
 }
