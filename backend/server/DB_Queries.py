@@ -10,7 +10,8 @@ class DatabaseQueries:
 
     def get_material_by_location(self, location_id):
         try:
-            location = self.db.collection('actual_locations').document(location_id).get().to_dict()
+            location = self.db.collection('actual_locations').document(
+                location_id).get().to_dict()
             material_saved = location['material']
         except Exception as e:
             print(f"An Error Occurred: {e}")
@@ -29,11 +30,6 @@ class DatabaseQueries:
             return True
         elif material_found:
             with open('log.txt', 'a') as outfile:
-                outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " " + location_id + " " + material_expected + " " + material_found + "\n")
+                outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " " +
+                              location_id + " " + material_expected + " " + material_found + "\n")
             return False
-
-
-if __name__ == '__main__':
-    db = DatabaseQueries()
-    print(db.check_box_status("5,96,60", "material 882"))  # returns True
-    print(db.check_box_status("5,82,0", "material 872"))  # returns False
