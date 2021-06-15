@@ -1,5 +1,6 @@
 import pyodbc 
 import unittest
+import logging
 from datetime import datetime
 from colorama import Fore, Style
 
@@ -20,7 +21,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			print(f"An Error Occurred: {e}")
+			logging.error(f"An Error Occurred: {e}")
 		return None
 
 	def get_material_by_location(self, location_id):
@@ -29,7 +30,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			print(f"An Error Occurred: {e}")
+			logging.error(f"An Error Occurred: {e}")
 		return None
 
 	def get_material_by_pallet(self, pallet):
@@ -38,7 +39,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			print(f"An Error Occurred: {e}")
+			logging.error(f"An Error Occurred: {e}")
 		return None
 
 	def get_pallet_by_location(self, location):
@@ -47,7 +48,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			print(f"An Error Occurred: {e}")
+			logging.error(f"An Error Occurred: {e}")
 		return None
 
 	def check_box_status(self, location_id, material_expected, pallet):
@@ -56,48 +57,36 @@ class DatabaseQueries:
 			with open('log.txt', 'a') as outfile:
 				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " | " + pallet + "\n")
 			if material_expected != material_found:
-				if material_found:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " " + material_found.ljust(padding) + " | " + pallet + "\n")
-				else:	
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " NO_MATERIAL_FOUND | " + pallet + "\n")
+				found = " " + material_found.ljust(padding) + " | " if material_found else " NO_MATERIAL_FOUND | " 
+				with open('log_errors.txt', 'a') as outfile:
+						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + found + pallet + "\n")
 				return False
 		elif not pallet:
 			material_found = self.get_material_by_location(location_id)
 			with open('log.txt', 'a') as outfile:
 				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " | NO_PALLET_FOUND\n")
 			if material_expected != material_found:
-				if material_found:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " " + material_found.ljust(padding) + " | NO_PALLET_FOUND\n")
-				else:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " NO_MATERIAL_FOUND | NO_PALLET_FOUND\n")
+				found = " " + material_found.ljust(padding) + " | " if material_found else " NO_MATERIAL_FOUND | "
+				with open('log_errors.txt', 'a') as outfile:
+						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + found + "NO_PALLET_FOUND\n")
 				return False
 		elif not location_id:
 			material_found = self.get_material_by_pallet(pallet)
 			with open('log.txt', 'a') as outfile:
 				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | NO_LOCATION_FOUND | " + material_expected.ljust(padding) + " | " + pallet + "\n")
 			if material_expected != material_found:
-				if material_found:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | NO_LOCATION_FOUND | " + material_expected.ljust(padding) + " " + material_found.ljust(padding) + " | " + pallet + "\n")
-				else:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | NO_LOCATION_FOUND | " + material_expected.ljust(padding) + " NO_MATERIAL_FOUND | " + pallet + "\n")
+				found = " " + material_found.ljust(padding) + " | " if material_found else " NO_MATERIAL_FOUND | "
+				with open('log_errors.txt', 'a') as outfile:
+						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | NO_LOCATION_FOUND | " + material_expected.ljust(padding) + found + pallet + "\n")
 				return False
 		elif not material_expected:
 			pallet_found = self.get_pallet_by_location(location_id)
 			with open('log.txt', 'a') as outfile:
 				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | NO_MATERIAL_FOUND | " + pallet + "\n")
 			if pallet != pallet_found:
-				if pallet_found:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + pallet.ljust(padding) + " " + pallet_found.ljust(padding) + " | NO_MATERIAL_FOUND \n")
-				else:
-					with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + pallet.ljust(padding) + " NO_PALLET_FOUND | NO_MATERIAL_FOUND \n")
+				found = " " + pallet_found.ljust(padding) + " | " if pallet_found else " NO_PALLET_FOUND | "
+				with open('log_errors.txt', 'a') as outfile:
+						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + pallet.ljust(padding) + found + "NO_MATERIAL_FOUND \n")
 				return False
 		return True
 
