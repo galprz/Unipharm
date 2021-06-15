@@ -21,7 +21,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			logging.error(f"An Error Occurred: {e}")
+			logging.exception(f"An Error Occurred: {e}")
 		return None
 
 	def get_material_by_location(self, location_id):
@@ -30,7 +30,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			logging.error(f"An Error Occurred: {e}")
+			logging.exception(f"An Error Occurred: {e}")
 		return None
 
 	def get_material_by_pallet(self, pallet):
@@ -39,7 +39,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			logging.error(f"An Error Occurred: {e}")
+			logging.exception(f"An Error Occurred: {e}")
 		return None
 
 	def get_pallet_by_location(self, location):
@@ -48,7 +48,7 @@ class DatabaseQueries:
 			for row in self.cursor:
 				return row[0]
 		except Exception as e:
-			logging.error(f"An Error Occurred: {e}")
+			logging.exception(f"An Error Occurred: {e}")
 		return None
 
 	def check_box_status(self, location_id, material_expected, pallet):
