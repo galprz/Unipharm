@@ -39,19 +39,16 @@ def parse_video(path, parameters={'sample_rate': 10}):
 
 
 def analyze_single_image(path, parameters={}):
-    found, res = process_image(cv2.imread(path), 0, parameters)
-    if found:
-        return [(0, res)]
-    else:
-        return []
+    res = process_image(cv2.imread(path), 0, parameters)
+    return [(0, res)] if len(res) > 0 else []
 
 
 def analyze(path, parameters={'sample_rate': 10, 'visualize_numbers': []}):
     images = parse_video(path, parameters)
     result = []
     for index, image in enumerate(images):
-        found, res = process_image(image, index, parameters)
-        if found:
+        res = process_image(image, index, parameters)
+        if len(res) > 0:
             result.append((index, res))
     return result
 
@@ -104,7 +101,7 @@ def process_image(image, idx,  parameters):
         else:
             previously_identified.append(barcode.data.decode("utf-8"))
             decoded_barcodes.append(DecodedBarcode(barcode))
-    return len(decoded_barcodes) > 0, decoded_barcodes
+    return decoded_barcodes
 
 
 if __name__ == "__main__":
