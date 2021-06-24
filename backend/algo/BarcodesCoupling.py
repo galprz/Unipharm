@@ -70,15 +70,14 @@ def can_match(barcode1: DecodedBarcode, barcode2: DecodedBarcode):
     mat_x_avg, mat_y_avg = __get_barcode_xy_avg(material_barcode) if material_barcode else (0, 0)
     raf_x_avg, raf_y_avg = __get_barcode_xy_avg(raft_barcode)     if raft_barcode     else (0, 0)
     
-    # location under material
+    # location above material
     if loaction_barcode and material_barcode:
         x_diff = abs(loc_x_avg - mat_x_avg)
-        return loc_y_avg > mat_y_avg and x_diff <= 0.4 * IMAGE_WIDTH
-    # location under raft
+        return loc_y_avg < mat_y_avg and x_diff <= 0.4 * IMAGE_WIDTH
+    # location above raft
     elif loaction_barcode and raft_barcode:
         x_diff = abs(loc_x_avg - raf_x_avg)
-        y_diff = abs(loc_y_avg - raf_y_avg)
-        return loc_y_avg > raf_y_avg and x_diff <= 0.3 * IMAGE_WIDTH and y_diff <= 0.2 * IMAGE_HEIGHT
+        return loc_y_avg < raf_y_avg and x_diff <= 0.3 * IMAGE_WIDTH
     # raft under material
     elif material_barcode and raft_barcode:
         x_diff = abs(mat_x_avg - raf_x_avg)
@@ -125,15 +124,15 @@ class BarcodesTrios:
             return self.trios_by_material[key]
         if key.type == ip_main.RAFT:
             return self.trios_by_raft[key]
-        return self.__find_in_trios(key)
+        return self.find(key)
     
     def __setitem__(self, key: ip_main.DecodedBarcode, val: ip_main.DecodedBarcode):
         assert(key.type != val.type)
 
-        trio = self.__find_in_trios(key)
+        trio = self.find(key)
         is_in_trios = trio.location or trio.material or trio.raft
         if not is_in_trios:
-            trio = self.__find_in_trios(val)
+            trio = self.find(val)
             is_in_trios = trio.location or trio.material or trio.raft
         
         # insert key to the right field in trio
@@ -163,7 +162,7 @@ class BarcodesTrios:
             self.trios_by_raft[trio.raft] = trio
     
 
-    def __find_in_trios(self, key):
+    def find(self, key):
         for trio in self.trios:
             if  (key.type == ip_main.LOCATION and trio.location == key) or \
                 (key.type == ip_main.MATERIAL and trio.material == key) or \
