@@ -10,7 +10,8 @@ with open('../../camera_settings.json') as f:
 
 
 def couple_barcodes(path):
-    """ Tries to group the location, material and raft barcodes while analyzing the video.
+    """ This is the most important function of this file (and actually the only one that sould be used outside this file).
+        It tries to group the location, material and raft barcodes while analyzing the video.
 
     Args:
         path (string): the path of the video file
@@ -38,6 +39,14 @@ def couple_barcodes(path):
 
 
 def classify_barcodes(barcodes: List[DecodedBarcode]):
+    """ Classifies all the barcodes by their types.
+
+    Args:
+        barcodes (List[DecodedBarcode]): a list of all the barcodes deteceted in the video
+
+    Returns:
+        tuple(list, list, list) : three lists of barcodes (separated by types) in the following order: locations, materials, rafts
+    """
     locations = []
     materials = []
     rafts = []
@@ -56,8 +65,11 @@ def classify_barcodes(barcodes: List[DecodedBarcode]):
 
 
 class Barcode(object):
-    """ Usage:
+    """ Creation:
             Barcode(db: DecodedBarcode) or Barcode(data, type)
+        Fields:
+            data - barcode's data as stored in DecodedBarcode
+            type - barcode's type as stored in DecodedBarcode
     """
     def __init__(self, **kwargs):
         self.data = None
@@ -80,6 +92,10 @@ class Barcode(object):
 
 
 class Trio(object):
+    """ Represents a trio of barcodes for a common item in the warehouse.
+        It has be a location, material and raft.
+        At least 2 of the 3 barcodes should be not None.
+    """
     def __init__(self, location: Barcode=None, material: Barcode=None, raft: Barcode=None):
         self.location = location
         self.material = material
@@ -166,6 +182,15 @@ class BarcodesTrios:
 
 
 def can_match(barcode1: DecodedBarcode, barcode2: DecodedBarcode) -> Tuple[Barcode, Barcode]:
+    """ Checks whether the two given barcodes correspond to the same item in the warehouse.
+
+    Args:
+        barcode1 (DecodedBarcode): first barcode as detected in the video
+        barcode2 (DecodedBarcode): second barcode as detected in the video
+
+    Returns:
+        Tuple[Barcode, Barcode]: these two barcodes (of Barcode type) if there is a match, otherwise Nones
+    """
     if barcode1.type == barcode2.type:
         return False
 
@@ -214,7 +239,9 @@ def can_match(barcode1: DecodedBarcode, barcode2: DecodedBarcode) -> Tuple[Barco
         x_diff = abs(mat_x_avg - raf_x_avg)
         if raf_y_avg > mat_y_avg and x_diff <= 0.25 * IMAGE_WIDTH:
             return Barcode(db=material_barcode), Barcode(db=raft_barcode)
-    return None, None    # should not get here
+    
+    # the barcodes don't match
+    return None, None
 
 
 def __get_barcode_xy_avg(barcode: DecodedBarcode):

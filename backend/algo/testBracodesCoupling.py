@@ -1,3 +1,9 @@
+""" Test class of the BarcodesCoupling file only.
+
+    It checks that the coupling is done correctly while assuming that 
+    the location barcode is above the material which is above the raft, 
+    except for the last (8th) floor where the location is below them both.
+"""
 import unittest
 from unittest.mock import patch
 from ip_main import DecodedBarcode, LOCATION, RAFT, MATERIAL
@@ -22,12 +28,12 @@ class TestBarcodesCopuling(unittest.TestCase):
     def __init__(self, methodName: str):
         super().__init__(methodName=methodName)
         with patch.object(DecodedBarcode, '__init__', DecodedBarcode_init_mock):
-            self.decoded_barcodes = [DecodedBarcode('E-04-01', (212,0), (436,120)),
-                                    DecodedBarcode('C-23-04', (1331,0), (1331,130)),
-                                    DecodedBarcode('W00025640', (217,309), (418,387)),
-                                    DecodedBarcode('W00025419', (1116,294), (1317,372)),
-                                    DecodedBarcode('92103022', (238,140), (393,218)),
-                                    DecodedBarcode('92103015', (1141,133), (1296,202))]
+            self.decoded_barcodes = [DecodedBarcode('E-04-01', (212,0), (436,120)),         # location
+                                    DecodedBarcode('C-23-04', (1331,0), (1331,130)),        # location
+                                    DecodedBarcode('W00025640', (217,309), (418,387)),      # raft
+                                    DecodedBarcode('W00025419', (1116,294), (1317,372)),    # raft
+                                    DecodedBarcode('92103022', (238,140), (393,218)),       # material
+                                    DecodedBarcode('92103015', (1141,133), (1296,202))]     # material
         barcodes = [Barcode(db=decoded) for decoded in self.decoded_barcodes]
         trio1, trio2 = Trio(), Trio()
         # trio1: 'E-04-01', 'W00025640', '92103022'
@@ -64,9 +70,9 @@ class TestBarcodesCopuling(unittest.TestCase):
 
     def test_last_floor(self, analyze_mock):
         with patch.object(DecodedBarcode, '__init__', DecodedBarcode_init_mock):
-            barcodes = [DecodedBarcode('92103022', (350, 20), (400, 60)),
-                        DecodedBarcode('W00025640', (420, 150), (550, 180)),
-                        DecodedBarcode('A-21-08', (200, 350), (500, 400))]
+            barcodes = [DecodedBarcode('92103022', (350, 20), (400, 60)),       # material
+                        DecodedBarcode('W00025640', (420, 150), (550, 180)),    # raft
+                        DecodedBarcode('A-21-08', (200, 350), (500, 400))]      # location
         analyze_mock.return_value = [(0, barcodes)]
         barcodes_trios = couple_barcodes('')
 

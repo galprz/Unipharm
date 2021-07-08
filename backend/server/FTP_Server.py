@@ -7,8 +7,6 @@ from BarcodesCoupling import *
 
 
 db = DatabaseQueries()
-# a = analyze(1)
-# y = 1
 
 class FTP_Server:
     def __init__(self):
@@ -35,7 +33,7 @@ class FTP_Server:
                 read the barcodes,
                 compare the results with the data stored in Unipharm's DB,
                 emit any mismatches to a log file,
-                and delete the file from server's storage """
+                and delete the video file from server's storage """
             actual_data = couple_barcodes(file)
             self.__compare_and_log(actual_data)
             os.remove(file)
