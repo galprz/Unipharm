@@ -1,47 +1,63 @@
-#from picamera import PiCamera
-import os
+#!/usr/bin/python3
+import sys
+import json
 from time import sleep
 import ftplib
+from picamera import PiCamera
+
+#  Load data from configuration file.
+with open("/home/pi/Desktop/Unipharm_config.json") as config_file:
+    data = json.load(config_file)
+
+#  Following function tries to take a video of the predefined length and store it on the given path.
+#  Returns True if successful or False if something is wrong with the camera.
 
 
-file1_path = r'D:\sec_yearly_fold\Unipharm\raspberry\1_6_vid.mp4'
-file2_path = r'D:\sec_yearly_fold\Unipharm\raspberry\7_12_vid.mp4'
-forklift_id = '1'
-side = 'left'
-server_url, username, password = "192.168.0.4:21", "user", "12345"
-#camera = PiCamera()
-session = ftplib.FTP()
-session.connect("192.168.0.4", 21)
-session.login(username, password)
-#h264_file_name = '/home/pi/Desktop/video.h264'
-#mp4_file_name = '/home/pi/Desktop/video.mp4'
-video_length = 5
+def get_video(output_path):
+    success = False
+    with PiCamera() as camera:
+        camera.framerate = data["framerate"]
+        camera.start_recording(output_path)
+        sleep(data["video_length"])
+        camera.stop_recording()
+        success = True
+
+    return success
 
 
-def m():
+def connect_to_server():
+    success = False
 
-    # camera.start_preview()
-    #    camera.start_recording(h264_file_name)
-    # sleep(video_length)
-    # camera.stop_recording()
-    # camera.stop_preview()
-    # os.system(
-    # f'MP4Box -add {h264_file_name} {mp4_file_name}')
-    # file = open(mp4_file_name, 'rb')   # file to send
-    file = open(file1_path, 'rb')
-    session.storbinary(f'STOR vid_{forklift_id}_{side}_1.mp4',
-                       file)     # send the file
-# session.storbinary(f'STOR {mp4_file_name}',
-    #                   file)     # send the file
-    file.close()
-    # os.remove(h264_file_name)
-    # os.remove(mp4_file_name)
-    sleep(5)
-    file = open(file2_path, 'rb')
-    session.storbinary(f'STOR vid_{forklift_id}_{side}_2.mp4',
-                       file)
-    file.close()
+    try:
+        session = ftplib.FTP()
+        session.connect(data["server_url"], data["port"])
+        session.login(data["username"], data["password"])
+        success = True
+    except Exception:
+        session = False
+    return session, success
+
+
+def routine():
+    session, success = connect_to_server()
+    while not success:
+        #  retry until successful in connecting to the server
+        sleep(5)
+        session, success = connect_to_server()
+    while True:
+        if get_video(
+                f'/home/pi/Desktop/vid_{data["identifier"]}_{data["side"]}_1'):
+            # Send video to the servetr using FTP
+            with open(f'/home/pi/Desktop/vid_{data["identifier"]}_{data["side"]}_1', 'rb') as file:
+                session.storbinary(
+                    f'STOR vid_{data["identifier"]}_{data["side"]}_1.mp4', file)
+        # wait either for the video to be sent or just wait to try again because there was a problem with the camera.
+        sleep(3)
 
 
 if __name__ == "__main__":
-    m()
+    print("hello world!")
+    print(sys.version)
+    print("Starting")
+    routine()
+    print("Done")
