@@ -1,7 +1,7 @@
-from ip_main import DecodedBarcode
+from ip_main import DecodedBarcode, LOCATION, MATERIAL, RAFT
 import ip_main
-from dataclasses import dataclass
 import json
+from typing import List, Tuple
 
 # get image dimensions
 with open('../../camera_settings.json') as f:
@@ -10,7 +10,8 @@ with open('../../camera_settings.json') as f:
 
 
 def couple_barcodes(path):
-    """ Tries to group the location, material and raft barcodes while analyzing the video.
+    """ This is the most important function of this file (and actually the only one that sould be used outside this file).
+        It tries to group the location, material and raft barcodes while analyzing the video.
 
     Args:
         path (string): the path of the video file
@@ -24,26 +25,37 @@ def couple_barcodes(path):
         locations, materials, rafts = classify_barcodes(barcodes)
         for loc in locations:
             for material in materials:
-                if can_match(loc, material):
-                    barcodes_trios[loc] = material
+                barcode_loc, barcode_material = can_match(loc, material)
+                if barcode_loc is not None and barcode_material is not None:
+                    barcodes_trios[barcode_loc] = barcode_material
                 for raft in rafts:
-                    if can_match(loc, raft):
-                        barcodes_trios[loc] = raft
-                    if can_match(material, raft):
-                        barcodes_trios[material] = raft
+                    barcode_loc, barcode_raft = can_match(loc, raft)
+                    if barcode_loc is not None and barcode_raft is not None:
+                        barcodes_trios[barcode_loc] = barcode_raft
+                    barcode_material, barcode_raft = can_match(material, raft)
+                    if barcode_material is not None and barcode_raft is not None:
+                        barcodes_trios[barcode_material] = barcode_raft
     return barcodes_trios
 
 
-def classify_barcodes(barcodes):
+def classify_barcodes(barcodes: List[DecodedBarcode]):
+    """ Classifies all the barcodes by their types.
+
+    Args:
+        barcodes (List[DecodedBarcode]): a list of all the barcodes deteceted in the video
+
+    Returns:
+        tuple(list, list, list) : three lists of barcodes (separated by types) in the following order: locations, materials, rafts
+    """
     locations = []
     materials = []
     rafts = []
     for barcode in barcodes:
-        if barcode.type == ip_main.LOCATION:
+        if barcode.type == LOCATION:
             locations.append(barcode)
-        elif barcode.type == ip_main.MATERIAL:
+        elif barcode.type == MATERIAL:
             materials.append(barcode)
-        elif barcode.type == ip_main.RAFT:
+        elif barcode.type == RAFT:
             rafts.append(barcode)
     # filter only unique barcodes
     locations = list(set(locations))
@@ -52,53 +64,50 @@ def classify_barcodes(barcodes):
     return locations, materials, rafts
 
 
-def can_match(barcode1: DecodedBarcode, barcode2: DecodedBarcode):
-    if barcode1.type == barcode2.type:
-        return False
-
-    loaction_barcode = barcode1 if barcode1.type == ip_main.LOCATION \
-                       else barcode2 if barcode2.type == ip_main.LOCATION \
-                       else None
-    material_barcode = barcode1 if barcode1.type == ip_main.MATERIAL \
-                       else barcode2 if barcode2.type == ip_main.MATERIAL \
-                       else None
-    raft_barcode = barcode1 if barcode1.type == ip_main.RAFT \
-                   else barcode2 if barcode2.type == ip_main.RAFT \
-                   else None
-
-    loc_x_avg, loc_y_avg = __get_barcode_xy_avg(loaction_barcode) if loaction_barcode else (0, 0)
-    mat_x_avg, mat_y_avg = __get_barcode_xy_avg(material_barcode) if material_barcode else (0, 0)
-    raf_x_avg, raf_y_avg = __get_barcode_xy_avg(raft_barcode)     if raft_barcode     else (0, 0)
+class Barcode(object):
+    """ Creation:
+            Barcode(db: DecodedBarcode) or Barcode(data, type)
+        Fields:
+            data - barcode's data as stored in DecodedBarcode
+            type - barcode's type as stored in DecodedBarcode
+    """
+    def __init__(self, **kwargs):
+        self.data = None
+        self.type = None
+        if len(kwargs) == 1:
+            item = list(kwargs.values())[0]
+            if type(item) == DecodedBarcode:
+                self.data = item.data
+                self.type = item.type
+        elif len(kwargs) == 2:
+            if {'data', 'type'} == set(kwargs):
+                self.data = kwargs['data']
+                self.type = kwargs['type']
     
-    # location under material
-    if loaction_barcode and material_barcode:
-        x_diff = abs(loc_x_avg - mat_x_avg)
-        return loc_y_avg > mat_y_avg and x_diff <= 0.4 * IMAGE_WIDTH
-    # location under raft
-    elif loaction_barcode and raft_barcode:
-        x_diff = abs(loc_x_avg - raf_x_avg)
-        y_diff = abs(loc_y_avg - raf_y_avg)
-        return loc_y_avg > raf_y_avg and x_diff <= 0.3 * IMAGE_WIDTH and y_diff <= 0.2 * IMAGE_HEIGHT
-    # raft under material
-    elif material_barcode and raft_barcode:
-        x_diff = abs(mat_x_avg - raf_x_avg)
-        return raf_y_avg > mat_y_avg and x_diff <= 0.25 * IMAGE_WIDTH
-    return False    # should not get here
+    def __eq__(self, other):
+        return self.data == other.data if other else False
+    
+    def __hash__(self):
+        return super().__hash__()
 
 
-def __get_barcode_xy_avg(barcode: DecodedBarcode):
-    x_top_left, y_top_left = barcode.get_barcode_top_left_corner()
-    x_bottom_right, y_bottom_right = barcode.get_barcode_bottom_right_corner()
-    x_avg = (x_bottom_right + x_top_left) / 2
-    y_avg = (y_bottom_right + y_top_left) / 2
-    return x_avg, y_avg
-
-
-@dataclass
-class Trio:
-    location = None
-    material = None
-    raft = None
+class Trio(object):
+    """ Represents a trio of barcodes for a common item in the warehouse.
+        It has be a location, material and raft.
+        At least 2 of the 3 barcodes should be not None.
+    """
+    def __init__(self, location: Barcode=None, material: Barcode=None, raft: Barcode=None):
+        self.location = location
+        self.material = material
+        self.raft = raft
+    
+    def __eq__(self, other):
+        return  self.location == other.location and \
+                self.material == other.material and \
+                self.raft == other.raft
+    
+    def __hash__(self):
+        return super().__hash__()
 
 
 class BarcodesTrios:
@@ -118,38 +127,38 @@ class BarcodesTrios:
         self.trios_by_material = {}
         self.trios_by_raft = {}
     
-    def __getitem__(self, key: ip_main.DecodedBarcode):
-        if key.type == ip_main.LOCATION:
+    def __getitem__(self, key: Barcode):
+        if key.type == LOCATION:
             return self.trios_by_location[key]
-        if key.type == ip_main.MATERIAL:
+        if key.type == MATERIAL:
             return self.trios_by_material[key]
-        if key.type == ip_main.RAFT:
+        if key.type == RAFT:
             return self.trios_by_raft[key]
-        return self.__find_in_trios(key)
+        return self.find(key)
     
-    def __setitem__(self, key: ip_main.DecodedBarcode, val: ip_main.DecodedBarcode):
+    def __setitem__(self, key: Barcode, val: Barcode):
         assert(key.type != val.type)
 
-        trio = self.__find_in_trios(key)
+        trio = self.find(key)
         is_in_trios = trio.location or trio.material or trio.raft
         if not is_in_trios:
-            trio = self.__find_in_trios(val)
+            trio = self.find(val)
             is_in_trios = trio.location or trio.material or trio.raft
         
         # insert key to the right field in trio
-        if key.type == ip_main.LOCATION:
+        if key.type == LOCATION:
             trio.location = key
-        elif key.type == ip_main.MATERIAL:
+        elif key.type == MATERIAL:
             trio.material = key
-        elif key.type == ip_main.RAFT:
+        elif key.type == RAFT:
             trio.raft = key
         
         # insert val to the right field in trio
-        if val.type == ip_main.LOCATION:
+        if val.type == LOCATION:
             trio.location = val
-        elif val.type == ip_main.MATERIAL:
+        elif val.type == MATERIAL:
             trio.material = val
-        elif val.type == ip_main.RAFT:
+        elif val.type == RAFT:
             trio.raft = val
         
         if not is_in_trios:
@@ -163,10 +172,81 @@ class BarcodesTrios:
             self.trios_by_raft[trio.raft] = trio
     
 
-    def __find_in_trios(self, key):
+    def find(self, key):
         for trio in self.trios:
-            if  (key.type == ip_main.LOCATION and trio.location == key) or \
-                (key.type == ip_main.MATERIAL and trio.material == key) or \
-                (key.type == ip_main.RAFT and trio.raft == key):
+            if  (key.type == LOCATION and trio.location == key) or \
+                (key.type == MATERIAL and trio.material == key) or \
+                (key.type == RAFT and trio.raft == key):
                 return trio
         return Trio()
+
+
+def can_match(barcode1: DecodedBarcode, barcode2: DecodedBarcode) -> Tuple[Barcode, Barcode]:
+    """ Checks whether the two given barcodes correspond to the same item in the warehouse.
+
+    Args:
+        barcode1 (DecodedBarcode): first barcode as detected in the video
+        barcode2 (DecodedBarcode): second barcode as detected in the video
+
+    Returns:
+        Tuple[Barcode, Barcode]: these two barcodes (of Barcode type) if there is a match, otherwise Nones
+    """
+    if barcode1.type == barcode2.type:
+        return False
+
+    loaction_barcode = barcode1 if barcode1.type == LOCATION \
+                       else barcode2 if barcode2.type == LOCATION \
+                       else None
+    material_barcode = barcode1 if barcode1.type == MATERIAL \
+                       else barcode2 if barcode2.type == MATERIAL \
+                       else None
+    raft_barcode = barcode1 if barcode1.type == RAFT \
+                   else barcode2 if barcode2.type == RAFT \
+                   else None
+
+    loc_x_avg, loc_y_avg = __get_barcode_xy_avg(loaction_barcode) if loaction_barcode else (0, 0)
+    mat_x_avg, mat_y_avg = __get_barcode_xy_avg(material_barcode) if material_barcode else (0, 0)
+    raf_x_avg, raf_y_avg = __get_barcode_xy_avg(raft_barcode)     if raft_barcode     else (0, 0)
+    
+    if loaction_barcode and material_barcode:
+        x_diff = abs(loc_x_avg - mat_x_avg)
+        is_same_column = x_diff <= 0.4 * IMAGE_WIDTH
+        floor = int(loaction_barcode.data[-1])
+        # usually location is above the material, except for the last (8th) floor which is below the material
+        if  (floor <  8 and loc_y_avg < mat_y_avg and is_same_column) or \
+            (floor == 8 and loc_y_avg > mat_y_avg and is_same_column):
+            return Barcode(db=loaction_barcode), Barcode(db=material_barcode)
+        # take the location above if only the one below had been recognized
+        if is_same_column and loc_y_avg > mat_y_avg:
+            loc_above = loaction_barcode.data[:-1] + str(floor + 1)
+            return Barcode(data=loc_above, type=LOCATION), Barcode(db=material_barcode)
+    
+    elif loaction_barcode and raft_barcode:
+        x_diff = abs(loc_x_avg - raf_x_avg)
+        is_same_column = x_diff <= 0.3 * IMAGE_WIDTH
+        floor = int(loaction_barcode.data[-1])
+        # usually location is above the raft, except for the last (8th) floor which is below the raft
+        if  (floor <  8 and loc_y_avg < raf_y_avg and is_same_column) or \
+            (floor == 8 and loc_y_avg > raf_y_avg and is_same_column):
+            return Barcode(db=loaction_barcode), Barcode(db=raft_barcode)
+        # take the location above if only the one below had been recognized
+        if is_same_column and loc_y_avg > raf_y_avg:
+            loc_above = loaction_barcode.data[:-1] + str(floor + 1)
+            return Barcode(data=loc_above, type=LOCATION), Barcode(db=raft_barcode)
+    
+    # raft below material
+    elif material_barcode and raft_barcode:
+        x_diff = abs(mat_x_avg - raf_x_avg)
+        if raf_y_avg > mat_y_avg and x_diff <= 0.25 * IMAGE_WIDTH:
+            return Barcode(db=material_barcode), Barcode(db=raft_barcode)
+    
+    # the barcodes don't match
+    return None, None
+
+
+def __get_barcode_xy_avg(barcode: DecodedBarcode):
+    x_top_left, y_top_left = barcode.get_barcode_top_left_corner()
+    x_bottom_right, y_bottom_right = barcode.get_barcode_bottom_right_corner()
+    x_avg = (x_bottom_right + x_top_left) / 2
+    y_avg = (y_bottom_right + y_top_left) / 2
+    return x_avg, y_avg

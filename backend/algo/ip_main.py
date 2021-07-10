@@ -87,6 +87,12 @@ class DecodedBarcode(object):
             c = 'RAFT'
 
         return f'Value: {self.data}  Type: {c}  Top Left Corner: ({self.top_left[0]},{self.top_left[1]})  Bottom Right Corner: ({self.bottom_right[0]},{self.bottom_right[1]})'
+    
+    def __eq__(self, other):
+        return self.data == other.data if other else False
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 def process_image(image, idx,  parameters):
