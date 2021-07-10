@@ -122,7 +122,3 @@ def process_image(image, idx,  parameters):
             previously_identified.append(barcode.data.decode("utf-8"))
             decoded_barcodes.append(DecodedBarcode(barcode))
     return decoded_barcodes
-
-
-if __name__ == "__main__":
-    print("Hello world")
