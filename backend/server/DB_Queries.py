@@ -15,11 +15,11 @@ class DatabaseQueries:
 		cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
 		self.cursor = cnxn.cursor()
 
-	def get_material(self, location_id, pallet):
+	def get_material(self, location_id, pallet): # whenever we have all parts (material, location, pallet)
 		try:
 			self.cursor.execute("SELECT SERIALNAME FROM unip.dbo.TECH_WarhsBal WHERE LOCNAME = '" + location_id + "' AND PALLETNAME = '" + pallet + "'")
-			for row in self.cursor:
-				return row[0]
+			for row in self.cursor: 
+				return row[0] # returns the result
 		except Exception as e:
 			logging.exception(e, exc_info=True)
 		return None
@@ -28,7 +28,7 @@ class DatabaseQueries:
 		try:
 			self.cursor.execute("SELECT SERIALNAME FROM unip.dbo.TECH_WarhsBal WHERE LOCNAME = '" + location_id + "'")
 			for row in self.cursor:
-				return row[0]
+				return row[0] # returns the result
 		except Exception as e:
 			logging.exception(e, exc_info=True)
 		return None
@@ -37,7 +37,7 @@ class DatabaseQueries:
 		try:
 			self.cursor.execute("SELECT SERIALNAME FROM unip.dbo.TECH_WarhsBal WHERE PALLETNAME = '" + pallet + "'")
 			for row in self.cursor:
-				return row[0]
+				return row[0] # returns the result
 		except Exception as e:
 			logging.exception(e, exc_info=True)
 		return None
@@ -46,20 +46,20 @@ class DatabaseQueries:
 		try:
 			self.cursor.execute("SELECT PALLETNAME FROM unip.dbo.TECH_WarhsBal WHERE LOCNAME = '" + location + "'")
 			for row in self.cursor:
-				return row[0]
+				return row[0] # returns the result
 		except Exception as e:
 			logging.exception(e, exc_info=True)
 		return None
 
 	def check_box_status(self, location_id, material_expected, pallet):
-		if location_id and material_expected and pallet:
+		if location_id and material_expected and pallet: # if we have all fields
 			material_found = self.get_material(location_id, pallet)
 			with open('log.txt', 'a') as outfile:
-				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " | " + pallet + "\n")
-			if material_expected != material_found:
+				outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + " | " + pallet + "\n") # write we saw
+			if material_expected != material_found: # if we found in the DB a material different from what we saw in the videos
 				found = " " + material_found.ljust(padding) + " | " if material_found else " NO_MATERIAL_FOUND | " 
 				with open('log_errors.txt', 'a') as outfile:
-						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + found + pallet + "\n")
+						outfile.write(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + " | " + location_id.ljust(padding) + " | " + material_expected.ljust(padding) + found + pallet + "\n") # write information including error
 				return False
 		elif not pallet:
 			material_found = self.get_material_by_location(location_id)
