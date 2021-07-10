@@ -5,9 +5,12 @@ from time import sleep
 import ftplib
 from picamera import PiCamera
 
-
+#  Load data from configuration file.
 with open("/home/pi/Desktop/Unipharm_config.json") as config_file:
     data = json.load(config_file)
+
+#  Following function tries to take a video of the predefined length and store it on the given path.
+#  Returns True if successful or False if something is wrong with the camera.
 
 
 def get_video(output_path):
@@ -38,6 +41,7 @@ def connect_to_server():
 def routine():
     session, success = connect_to_server()
     while not success:
+        #  retry until successful in connecting to the server
         sleep(5)
         session, success = connect_to_server()
     while True:
@@ -47,6 +51,7 @@ def routine():
             with open(f'/home/pi/Desktop/vid_{data["identifier"]}_{data["side"]}_1', 'rb') as file:
                 session.storbinary(
                     f'STOR vid_{data["identifier"]}_{data["side"]}_1.mp4', file)
+        # wait either for the video to be sent or just wait to try again because there was a problem with the camera.
         sleep(3)
 
 
