@@ -3,17 +3,44 @@ import os
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
-
-def analyze(x):
-    yield [("5,96,60", "material 882"),("5,82,0", "material 872"),("-65,103,0", "material 463"),("-95,96,0", "material 820"),("5,131,60", "material 879"),("-115,89,30", "material 158"),("-105,117,60", "material 237"),("-105,131,0", "material 236"),("-25,110,30", "material 707"),("-25,12,0", "material 666")]
-    yield [("-35,68,30", "material 629"),("-5,40,30", "material 797"),("-65,26,0", "material 626"),("-85,54,0", "material 767"),("-95,138,30", "material 299"),("-95,19,0", "material 247"),("5,75,0", "material 871"),("5,68,30", "material 868"),("-95,103,0", "material 283"),("-15,61,0", "material 745")]
-    while(True):
-        yield [("-35,68,30", "material 629"),("-5,40,30", "material 797"),("-65,26,0", "material 626"),("-85,54,0", "material 767"),("-95,138,30", "material 299"),("-95,19,0", "material 247"),("5,75,0", "material 871"),("5,68,30", "material 868"),("-95,103,0", "material 283"),("-15,61,0", "material 745")]
+from flask import *
+import json
+import sys
+sys.path.append('../algo')
+from BarcodesCoupling import *
 
 
 db = DatabaseQueries()
-a = analyze(1)
-y = 1
+
+# Initialize Flask app
+app = Flask(__name__)
+port_num = 8080
+ip = '0.0.0.0'
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
+@app.route('/', methods=['GET'])
+def show_form():
+    # Display the form responsible for parameter tuning
+    try:
+        return render_template("tune_params_form.html", sample_rate="7")
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
+@app.route('/', methods=['POST'])
+def update_params():
+    try:
+        # Load json file containing the tuning parameters
+        with open("barcode_params.json", "r") as jsonFile:
+            data = json.load(jsonFile)
+        # Get the new values that the user submitted
+        data["sample_rate"] = request.form['sample_rate']
+        data["crop"] = request.form['crop']
+        # Update json with the new values
+        with open("barcode_params.json", "w") as jsonFile:
+            json.dump(data, jsonFile)
+        return render_template("tune_params_form.html", sample_rate="7")
+    except Exception as e:
+        return f"An Error Occured: {e}"
 
 class FTP_Server:
     def __init__(self):
@@ -24,8 +51,8 @@ class FTP_Server:
         self.handler.authorizer = self.authorizer
         self.authorizer.add_user('user', '12345', '.', perm='elradfmwMT')
         self.handler.permit_foreign_addresses = True
-        # Listen on 0.0.0.0:21 (TODO: change it?)
-        self.address = ('192.168.0.4', 21)
+        
+        self.address = (ip, 21)
         server = FTPServer(self.address, self.handler)
         server.serve_forever()
 
@@ -38,15 +65,18 @@ class FTP_Server:
         def on_file_received(self, file):
             """ When a file (video) received we should:
                 read the barcodes,
-                compare the results with the data stored in Unipharm's DB
-                and emit any mismatches to a log file """
-            actual_data = next(a)  # analyze gets a video and returns a list of tuples (location, material)
+                compare the results with the data stored in Unipharm's DB,
+                emit any mismatches to a log file,
+                and delete the video file from server's storage """
+            actual_data = couple_barcodes(file)
             self.__compare_and_log(actual_data)
+            os.remove(file)
 
-        def __compare_and_log(self, data):
-            for loc, material in data:
-                self.db.check_box_status(loc, material)
+        def __compare_and_log(self, data: BarcodesTrios):
+            for trio in data:
+                self.db.check_box_status(trio.location.data, trio.material.data, trio.raft.data)
 
-
+port = int(os.environ.get('PORT', port_num))
 if __name__ == '__main__':
+    app.run(threaded=True, host=ip, port=port, debug=True)
     FTP_Server()
