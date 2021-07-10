@@ -27,6 +27,7 @@ def visualize(image, barcodes, out_path=None):
         cv2.imwrite(out_path, image)
 
 
+#  The following is a generator that each time returns the next frame of a video given in `path`
 def parse_video(path, parameters={'sample_rate': 10}):
     vc = cv2.VideoCapture(path)
     success, frame = vc.read()
@@ -37,10 +38,16 @@ def parse_video(path, parameters={'sample_rate': 10}):
         count += 1
         success, frame = vc.read()
 
+#  used mostly for testing, analyzes a single image with no merging of results with other image's results.
+
 
 def analyze_single_image(path, parameters={}):
     res = process_image(cv2.imread(path), 0, parameters)
     return [(0, res)] if len(res) > 0 else []
+
+#  recevies a path to a video and analyzes sampled frames from it.
+#  output is a list with a tupple for each frame in which barcodes were identifdied
+# where its second element is a list of objects describing the identified and decoded barcodes.
 
 
 def analyze(path, parameters={'sample_rate': 10, 'visualize_numbers': []}):
@@ -57,6 +64,8 @@ RAFT = 0
 MATERIAL = 1
 LOCATION = 2
 
+#  This represents an identified barcode
+
 
 class DecodedBarcode(object):
     def __init__(self, barcode):
@@ -72,12 +81,14 @@ class DecodedBarcode(object):
         else:
             self.type = MATERIAL
 
+    #  following two methods are for topology analysis
     def get_barcode_top_left_corner(self) -> tuple:
         return self.top_left
 
     def get_barcode_bottom_right_corner(self) -> tuple:
         return self.bottom_right
 
+    #  Future compatibility
     def __str__(self):
         if self.type == MATERIAL:
             c = 'MATERIAL'
@@ -87,18 +98,21 @@ class DecodedBarcode(object):
             c = 'RAFT'
 
         return f'Value: {self.data}  Type: {c}  Top Left Corner: ({self.top_left[0]},{self.top_left[1]})  Bottom Right Corner: ({self.bottom_right[0]},{self.bottom_right[1]})'
-    
+
     def __eq__(self, other):
         return self.data == other.data if other else False
 
     def __hash__(self):
         return super().__hash__()
 
+#   The main image processing logic based on pyzbar library
+
 
 def process_image(image, idx,  parameters):
     found_barcodes = pyzbar.decode(image, symbols=SUPPORTED_BARCODE_TYPES)
     previously_identified = []
     decoded_barcodes = []
+    #  visualize numbers is a parameter for testing
     if 'visualize_numbers' in parameters.keys() and idx in parameters['visualize_numbers']:
         visualize(image, found_barcodes, r'D:\visualized.jpg')
     for barcode in found_barcodes:
@@ -108,12 +122,3 @@ def process_image(image, idx,  parameters):
             previously_identified.append(barcode.data.decode("utf-8"))
             decoded_barcodes.append(DecodedBarcode(barcode))
     return decoded_barcodes
-
-
-if __name__ == "__main__":
-    # x = analyze(r'D:\sec_yearly_fold\Unipharm\backend\algo\2021_vid_2.mp4')
-    x = analyze_single_image(r'D:\attempt3.jpg')
-    for z in x:
-        print(f'Frame: {z[0]}')
-        for y in z[1]:
-            print(y)
